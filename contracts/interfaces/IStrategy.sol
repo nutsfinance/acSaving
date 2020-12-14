@@ -9,14 +9,33 @@ pragma solidity 0.6.12;
  */
 interface IStrategy {
 
+    /**
+     * @dev Returns the vault that uses the strategy.
+     */
     function vault() external view returns (address);
 
+    /**
+     * @dev Returns the Controller that manages the vault.
+     * Should be the same as Vault.controler().
+     */
     function controller() external view returns (address);
 
+    /**
+     * @dev Returns the token that the vault pools to seek yield.
+     * Should be the same as Vault.want().
+     */
     function want() external view returns (address);
 
+    /**
+     * @dev Returns the governance of the Strategy.
+     * Controller and its underlying vaults and strategies should share the same governance.
+     */
     function governance() external view returns (address);
 
+    /**
+     * @dev Return the strategist which performs daily permissioned operations.
+     * Vault and its underlying strategies should share the same strategist.
+     */
     function strategist() external view returns (address);
 
     function balanceOf() external view returns (uint256);

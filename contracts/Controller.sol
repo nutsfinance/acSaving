@@ -98,7 +98,7 @@ contract Controller is IController, Initializable {
         uint256 vaultId = numVaults;
         vaults[vaultId] = _vault;
         numVaults++;
-        emit VaultAdded(vaultId, _vault, address(IVault(_vault).want()));
+        emit VaultAdded(vaultId, _vault, IVault(_vault).want());
 
         return vaultId;
     }

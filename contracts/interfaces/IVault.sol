@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-
 /**
  * @notice Interface of Vault contract.
  * 
@@ -14,7 +12,7 @@ interface IVault {
     /**
      * @dev Returns the token that the vault pools.
      */
-    function want() external view returns (IERC20Upgradeable);
+    function want() external view returns (address);
 
     /**
      * @dev Returns the Controller address.
