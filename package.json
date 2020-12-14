@@ -1,0 +1,30 @@
+{
+  "name": "acsaving",
+  "version": "1.0.0",
+  "description": "ACoconut Savings",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nutsfinance/acSaving.git"
+  },
+  "keywords": [
+    "acoconut",
+    "defi",
+    "saving"
+  ],
+  "author": "tech@nuts.finance",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nutsfinance/acSaving/issues"
+  },
+  "homepage": "https://github.com/nutsfinance/acSaving#readme",
+  "dependencies": {
+    "@openzeppelin/contracts-upgradeable": "^3.3.0"
+  }
+}
