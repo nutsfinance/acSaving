@@ -30,6 +30,8 @@ contract Controller is IController, Initializable {
     uint256 public override numVaults;
     mapping(uint256 => address) public override vaults;
 
+    uint256[50] private __gap;
+
     /**
      * @dev Initializes the Controller contract. Can be invoked only once.
      * @param _rewardToken Additional reward token (i.e. ACoconut) to the vault users.
@@ -96,7 +98,7 @@ contract Controller is IController, Initializable {
         uint256 vaultId = numVaults;
         vaults[vaultId] = _vault;
         numVaults++;
-        emit VaultAdded(vaultId, _vault, IVault(_vault).want());
+        emit VaultAdded(vaultId, _vault, address(IVault(_vault).want()));
 
         return vaultId;
     }
@@ -116,4 +118,5 @@ contract Controller is IController, Initializable {
         IVault(vault).notifyRewardAmount(_rewardAmount);
         emit RewardAdded(_vaultId, rewardToken, _rewardAmount);
     }
+    
 }
