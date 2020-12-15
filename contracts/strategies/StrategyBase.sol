@@ -16,7 +16,7 @@ abstract contract StrategyBase is IStrategy, Initializable {
     address public override vault;
     address public override controller;
 
-    function __StrategyBase__init(address _vault, address _controller) internal initializer {
+    function __StrategyBase__init(address _controller, address _vault) internal initializer {
         require(_vault != address(0x0), "vault not set");
         require(_controller != address(0x0), "controller not set");
 

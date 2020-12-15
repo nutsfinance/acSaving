@@ -6,7 +6,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
-import "./StrategyCurveBase.sol";
+import "./StrategyCurveLpBase.sol";
 import "../../interfaces/curve/ICurveFi.sol";
 import "../../interfaces/curve/ICurveMinter.sol";
 import "../../interfaces/uniswap/IUniswapRouter.sol";
@@ -14,7 +14,7 @@ import "../../interfaces/uniswap/IUniswapRouter.sol";
 /**
  * @dev Earning strategy that accepts renCRV, earns CRV and converts CRV back to renCRV as yield.
  */
-contract StrategyCurveRenCrv is StrategyCurveBase {
+contract StrategyCurveRenCrv is StrategyCurveLpBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
@@ -22,8 +22,8 @@ contract StrategyCurveRenCrv is StrategyCurveBase {
     address public constant RENCRV_GUAGE = address(0xB1F2cdeC61db658F091671F5f199635aEF202CAC); // renCrv guage
     address public constant REN_SWAP = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B); // REN swap
 
-    function initialize(address _vault, address _controller) public initializer {
-        __StrategyCurveBase__initialize(_vault, _controller, RENCRV_GUAGE, REN_SWAP);
+    function initialize(address _controller, address _vault) public initializer {
+        __StrategyCurveBase__initialize(_controller, _vault, RENCRV_GUAGE, REN_SWAP);
     }
     
     /**

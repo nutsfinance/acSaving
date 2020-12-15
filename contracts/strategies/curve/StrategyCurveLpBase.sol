@@ -12,7 +12,7 @@ import "../../interfaces/curve/ICurveGauge.sol";
 /**
  * @dev Earning strategy that accepts renCRV, earns CRV and converts CRV back to renCRV as yield.
  */
-abstract contract StrategyCurveBase is StrategyBase {
+abstract contract StrategyCurveLpBase is StrategyBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
@@ -29,11 +29,11 @@ abstract contract StrategyCurveBase is StrategyBase {
     address public guage;
     address public curve;
 
-    function __StrategyCurveBase__initialize(address _vault, address _controller, address _guage, address _curve) internal initializer {
+    function __StrategyCurveBase__initialize(address _controller, address _vault, address _guage, address _curve) internal initializer {
         require(_guage != address(0x0), "guage not set");
         require(_curve != address(0x0), "curve not set");
-        
-        __StrategyBase__init(_vault, _controller);
+
+        __StrategyBase__init(_controller, _vault);
         guage = _guage;
         curve = _curve;
     }
