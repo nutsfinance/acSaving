@@ -3,10 +3,11 @@ pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts-upgradeable/math/SafeMathUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
 import "./interfaces/IController.sol";
 import "./interfaces/IVault.sol";
-import "./interfaces/IERC20Mintable.sol";
 
 /**
  * @notice Controller for all vaults.
@@ -16,6 +17,7 @@ import "./interfaces/IERC20Mintable.sol";
  * reward allocation to vaults.
  */
 contract Controller is IController, Initializable {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
     event GovernanceUpdated(address indexed oldGovernance, address indexed newGovernance);
@@ -114,7 +116,7 @@ contract Controller is IController, Initializable {
         require(_rewardAmount > 0, "zero amount");
 
         address vault = vaults[_vaultId];
-        IERC20Mintable(rewardToken).mint(vault, _rewardAmount);
+        IERC20Upgradeable(rewardToken).safeTransferFrom(msg.sender, vault, _rewardAmount);
         IVault(vault).notifyRewardAmount(_rewardAmount);
         emit RewardAdded(_vaultId, rewardToken, _rewardAmount);
     }
