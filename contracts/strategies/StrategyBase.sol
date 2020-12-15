@@ -13,15 +13,18 @@ import "../interfaces/IStrategy.sol";
  */
 abstract contract StrategyBase is IStrategy, Initializable {
 
-    address public override vault;
-    address public override controller;
+    event PerformanceFeeUpdated(uint256 oldPerformanceFee, uint256 newPerformanceFee);
+    event WithdrawalFeeUpdated(uint256 oldWithdrawFee, uint256 newWithdrawFee);
 
-    function __StrategyBase__init(address _controller, address _vault) internal initializer {
+    address public override vault;
+    uint256 public override performanceFee;
+    uint256 public override withdrawalFee;
+    uint256 public constant FEE_MAX = 10000;    // 0.01%
+
+    function __StrategyBase__init(address _vault) internal initializer {
         require(_vault != address(0x0), "vault not set");
-        require(_controller != address(0x0), "controller not set");
 
         vault = _vault;
-        controller = _controller;
     }
 
     /**
@@ -30,6 +33,14 @@ abstract contract StrategyBase is IStrategy, Initializable {
      */
     function want() public override view returns (address) {
         return IVault(vault).want();
+    }
+
+    /**
+     * @dev Returns the Controller that manages the vault.
+     * Should be the same as Vault.controler().
+     */
+    function controller() public override view returns (address) {
+        return IVault(vault).controller();
     }
 
     /**
@@ -56,5 +67,27 @@ abstract contract StrategyBase is IStrategy, Initializable {
     modifier onlyStrategist() {
         require(msg.sender == governance() || msg.sender == strategist(), "not strategist");
         _;
+    }
+
+    /**
+     * @dev Updates the performance fee. Only governance can update the performance fee.
+     */
+    function setPerformanceFee(uint256 _performanceFee) public onlyGovernance {
+        require(_performanceFee <= FEE_MAX, "overflow");
+        uint256 oldPerformanceFee = performanceFee;
+        performanceFee = _performanceFee;
+
+        emit PerformanceFeeUpdated(oldPerformanceFee, _performanceFee);
+    }
+
+    /**
+     * @dev Updates the withdrawal fee. Only governance can update the withdrawal fee.
+     */
+    function setWithdrawalFee(uint256 _withdrawalFee) public onlyGovernance {
+        require(_withdrawalFee <= FEE_MAX, "overflow");
+        uint256 oldWithdrawalFee = withdrawalFee;
+        withdrawalFee = _withdrawalFee;
+
+        emit WithdrawalFeeUpdated(oldWithdrawalFee, _withdrawalFee);
     }
 }

@@ -22,15 +22,15 @@ contract StrategyCurveRenCrv is StrategyCurveLpBase {
     address public constant RENCRV_GUAGE = address(0xB1F2cdeC61db658F091671F5f199635aEF202CAC); // renCrv guage
     address public constant REN_SWAP = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B); // REN swap
 
-    function initialize(address _controller, address _vault) public initializer {
-        __StrategyCurveBase__initialize(_controller, _vault, RENCRV_GUAGE, REN_SWAP);
+    function initialize(address _vault) public initializer {
+        __StrategyCurveLpBase__initialize(_vault, RENCRV_GUAGE, REN_SWAP);
     }
     
     /**
-     * @dev Claims CRV from Curve and convert it back to renCRV. Only vault can harvest.
+     * @dev Claims CRV from Curve and convert it back to renCRV. Only vault, governance and strategist can harvest.
      */
     function harvest() public override {
-        require(msg.sender == vault, "not vault");
+        require(msg.sender == vault || msg.sender == governance() || msg.sender == strategist(), "not vault");
         // Claims CRV from Curve
         ICurveMinter(mintr).mint(guage);
         uint256 _crv = IERC20Upgradeable(crv).balanceOf(address(this));

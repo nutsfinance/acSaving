@@ -7,10 +7,11 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
 import "../StrategyBase.sol";
+import "../../interfaces/IController.sol";
 import "../../interfaces/curve/ICurveGauge.sol";
 
 /**
- * @dev Earning strategy that accepts renCRV, earns CRV and converts CRV back to renCRV as yield.
+ * @dev Base strategy for Curve's LP token, e.g. renCrv, hbtcCrv, tbtcCrv.
  */
 abstract contract StrategyCurveLpBase is StrategyBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -29,11 +30,11 @@ abstract contract StrategyCurveLpBase is StrategyBase {
     address public guage;
     address public curve;
 
-    function __StrategyCurveBase__initialize(address _controller, address _vault, address _guage, address _curve) internal initializer {
+    function __StrategyCurveLpBase__initialize(address _vault, address _guage, address _curve) internal initializer {
         require(_guage != address(0x0), "guage not set");
         require(_curve != address(0x0), "curve not set");
 
-        __StrategyBase__init(_controller, _vault);
+        __StrategyBase__init(_vault);
         guage = _guage;
         curve = _curve;
     }
@@ -61,6 +62,11 @@ abstract contract StrategyCurveLpBase is StrategyBase {
         if (_balance < _amount) {
             _amount = _withdrawSome(_amount.sub(_balance));
             _amount = _amount.add(_balance);
+        }
+        if (withdrawalFee > 0) {
+            uint256 _feeAmount = _amount.mul(withdrawalFee).div(FEE_MAX);
+            token.safeTransfer(IController(controller()).treasury(), _feeAmount);
+            _amount = _amount.sub(_feeAmount);
         }
 
         token.safeTransfer(vault, _amount);

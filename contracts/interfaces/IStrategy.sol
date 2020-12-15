@@ -39,6 +39,16 @@ interface IStrategy {
     function strategist() external view returns (address);
 
     /**
+     * @dev Return the percentage of fee charged on the generated yield.
+     */
+    function performanceFee() external view returns (uint256);
+
+    /**
+     * @dev Return the percentage of fee charged when asset is withdrawn from strategy.
+     */
+    function withdrawalFee() external view returns (uint256);
+
+    /**
      * @dev Returns the total balance of want token in this Strategy.
      */
     function balanceOf() external view returns (uint256);
