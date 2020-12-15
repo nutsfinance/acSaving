@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
+import "../interfaces/IVault.sol";
 import "../interfaces/IStrategy.sol";
 
 /**
@@ -18,9 +19,48 @@ abstract contract StrategyBase is IStrategy, Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
-    address public vault;
-    address public controller;
+    address public override vault;
+    address public override controller;
 
-    function __StrategyBase__init() internal initializer {}
+    function __StrategyBase__init(address _vault, address _controller) internal initializer {
+        require(_vault != address(0x0), "vault not set");
+        require(_controller != address(0x0), "controller not set");
 
+        vault = _vault;
+        controller = _controller;
+    }
+
+    /**
+     * @dev Returns the token that the vault pools to seek yield.
+     * Should be the same as Vault.want().
+     */
+    function want() public override view returns (address) {
+        return IVault(vault).want();
+    }
+
+    /**
+     * @dev Returns the governance of the Strategy.
+     * Controller and its underlying vaults and strategies should share the same governance.
+     */
+    function governance() public override view returns (address) {
+        return IVault(vault).governance();
+    }
+
+    /**
+     * @dev Return the strategist which performs daily permissioned operations.
+     * Vault and its underlying strategies should share the same strategist.
+     */
+    function strategist() public override view returns (address) {
+        return IVault(vault).strategist();
+    }
+
+    modifier onlyGovernance() {
+        require(msg.sender == governance(), "not governance");
+        _;
+    }
+
+    modifier onlyStrategist() {
+        require(msg.sender == governance() || msg.sender == strategist(), "not strategist");
+        _;
+    }
 }
