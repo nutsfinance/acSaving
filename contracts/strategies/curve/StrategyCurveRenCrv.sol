@@ -54,11 +54,18 @@ contract StrategyCurveRenCrv is StrategyCurveLpBase {
             IERC20Upgradeable(wbtc).safeApprove(curve, _wbtc);
             ICurveFi(curve).add_liquidity([0, _wbtc], 0);
         }
-        uint256 _want = IERC20Upgradeable(want()).balanceOf(address(this));
-        if (_want > 0) {
-            deposit();
+        IERC20Upgradeable token = IERC20Upgradeable(want());
+        uint256 _want = token.balanceOf(address(this));
+        if (_want == 0) {
+            return;
         }
+        uint256 _feeAmount = 0;
+        if (performanceFee > 0) {
+            _feeAmount = _want.mul(performanceFee).div(FEE_MAX);
+            token.safeTransfer(IController(controller()).treasury(), _feeAmount);
+        }
+        deposit();
 
-        emit Harvested(want(), _want);
+        emit Harvested(want(), _want, _feeAmount);
     }
 }
