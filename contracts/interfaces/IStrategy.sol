@@ -38,12 +38,24 @@ interface IStrategy {
      */
     function strategist() external view returns (address);
 
+    /**
+     * @dev Returns the total balance of want token in this Strategy.
+     */
     function balanceOf() external view returns (uint256);
 
+    /**
+     * @dev Invests the free token balance in the strategy.
+     */
     function deposit() external;
 
-    function withdraw(uint256 _shares) external;
+    /**
+     * @dev Withdraws a portional amount of assets from the Strategy.
+     */
+    function withdraw(uint256 _amount) external;
 
+    /**
+     * @dev Withdraws all assets out of the Strategy.  Usually used in strategy migration.
+     */
     function withdrawAll() external;
 
     function harvest() external;
