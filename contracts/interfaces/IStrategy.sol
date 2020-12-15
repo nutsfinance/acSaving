@@ -56,7 +56,7 @@ interface IStrategy {
     /**
      * @dev Withdraws all assets out of the Strategy.  Usually used in strategy migration.
      */
-    function withdrawAll() external;
+    function withdrawAll() external returns (uint256);
 
     function harvest() external;
 }
