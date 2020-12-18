@@ -117,7 +117,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
     /**
      * @dev Returns the total balance in both vault and strategy.
      */
-    function balance() public view returns (uint256) {
+    function balance() public override view returns (uint256) {
         IERC20Upgradeable token = IERC20Upgradeable(want);
         return activeStrategy == address(0x0) ? token.balanceOf(address(this)) :
             token.balanceOf(address(this)).add(IStrategy(activeStrategy).balanceOf());

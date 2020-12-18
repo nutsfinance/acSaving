@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
+
 /**
  * @notice Interface of Vault contract.
  * 
@@ -32,6 +33,11 @@ interface IVault {
      * Vault and its strategies managed share the same strategist.
      */
     function strategist() external view returns (address);
+
+     /**
+     * @dev Returns the total balance in both vault and strategy.
+     */
+    function balance() external view returns (uint256);
 
     /**
      * @dev Checks whether a strategy is approved on the vault.
