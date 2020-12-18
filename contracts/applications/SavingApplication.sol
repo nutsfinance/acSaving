@@ -197,6 +197,7 @@ contract SavingApplication is Initializable {
             require(autoAllocation[_accounts[i]][token], "not allowed");
 
             uint256 amount = IERC20Upgradeable(token).balanceOf(_accounts[i]);
+            if (amount == 0) continue;
             account.approveToken(token, address(vault), amount);
 
             bytes memory methodData = abi.encodeWithSignature("deposit(uint256)", amount);
