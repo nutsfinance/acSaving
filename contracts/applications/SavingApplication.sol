@@ -23,8 +23,8 @@ contract SavingApplication is Initializable {
     event StrategistUpdated(address indexed oldStrategist, address indexed newStrategist);
     event ControllerUpdated(address indexed oldController, address indexed newController);
     event AutoSavingUpdated(address indexed account, address indexed token, bool indexed allowed);
-    event Staked(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
-    event Unstaked(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
+    event Deposited(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
+    event Withdrawn(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Claimed(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Exited(address indexed account, uint256 indexed vaultId);
 
@@ -108,13 +108,13 @@ contract SavingApplication is Initializable {
     }
 
     /**
-     * @dev Stake token into rewarded vault.
-     * @param _account The account address used to stake.
-     * @param _vaultId ID of the vault to stake.
-     * @param _amount Amount of token to stake.
+     * @dev Deposit token into rewarded vault.
+     * @param _account The account address used to deposit.
+     * @param _vaultId ID of the vault to deposit.
+     * @param _amount Amount of token to deposit.
      * @param _claimRewards Whether to claim rewards at the same time.
      */
-    function stake(address _account, uint256 _vaultId, uint256 _amount, bool _claimRewards) external {
+    function deposit(address _account, uint256 _vaultId, uint256 _amount, bool _claimRewards) external {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
         require(_amount > 0, "zero amount");
@@ -127,7 +127,7 @@ contract SavingApplication is Initializable {
         bytes memory methodData = abi.encodeWithSignature("deposit(uint256)", _amount);
         account.invoke(address(vault), 0, methodData);
 
-        emit Staked(_account, _vaultId, token, _amount);
+        emit Deposited(_account, _vaultId, token, _amount);
 
         if (_claimRewards) {
             _claimAllRewards(_account, _vaultId, address(vault));
@@ -135,13 +135,13 @@ contract SavingApplication is Initializable {
     }
 
     /**
-     * @dev Unstake token out of RewardedVault.
-     * @param _account The account address used to unstake.
-     * @param _vaultId ID of the vault to unstake.
-     * @param _amount Amount of token to unstake.
+     * @dev Withdraws token out of RewardedVault.
+     * @param _account The account address used to withdraw.
+     * @param _vaultId ID of the vault to withdraw.
+     * @param _amount Amount of token to withdraw.
      * @param _claimRewards Whether to claim rewards at the same time.
      */
-    function unstake(address _account, uint256 _vaultId, uint256 _amount, bool _claimRewards) external {
+    function withdraw(address _account, uint256 _vaultId, uint256 _amount, bool _claimRewards) external {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
         require(_amount > 0, "zero amount");
@@ -156,7 +156,7 @@ contract SavingApplication is Initializable {
         bytes memory methodData = abi.encodeWithSignature("withdraw(uint256)", shares);
         account.invoke(address(vault), 0, methodData);
 
-        emit Unstaked(_account, _vaultId, token, _amount);
+        emit Withdrawn(_account, _vaultId, token, _amount);
 
         if (_claimRewards) {
             _claimAllRewards(_account, _vaultId, address(vault));
@@ -166,7 +166,7 @@ contract SavingApplication is Initializable {
     /**
      * @dev Exit the vault and claims all rewards.
      * @param _account The account address used to exit.
-     * @param _vaultId ID of the vault to unstake.
+     * @param _vaultId ID of the vault to exit.
      */
     function exit(address _account, uint256 _vaultId) external {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
@@ -183,7 +183,7 @@ contract SavingApplication is Initializable {
     /**
      * @dev Claims rewards from RewardedVault.
      * @param _account The account address used to claim rewards.
-     * @param _vaultId ID of the vault to unstake.
+     * @param _vaultId ID of the vault to claim rewards.
      */
     function claimRewards(address _account, uint256 _vaultId) public {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
@@ -228,7 +228,7 @@ contract SavingApplication is Initializable {
             bytes memory methodData = abi.encodeWithSignature("deposit(uint256)", amount);
             account.invoke(address(vault), 0, methodData);
 
-            emit Staked(_accounts[i], _vaultId, token, amount);
+            emit Deposited(_accounts[i], _vaultId, token, amount);
 
         }
     }
