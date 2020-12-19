@@ -10,6 +10,7 @@ import "../interfaces/IStrategy.sol";
  * @notice Base contract of Strategy.
  * 
  * This contact defines common properties and functions shared by all strategies.
+ * One strategy is bound to one vault and cannot be changed.
  */
 abstract contract StrategyBase is IStrategy, Initializable {
 

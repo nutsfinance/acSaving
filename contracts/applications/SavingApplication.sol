@@ -11,6 +11,10 @@ import "../interfaces/IController.sol";
 import "../interfaces/IAccount.sol";
 import "../interfaces/IVault.sol";
 
+/**
+ * @notice Application to save assets from account to vaults to
+ * earn yield and rewards.
+ */
 contract SavingApplication is Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
@@ -32,6 +36,9 @@ contract SavingApplication is Initializable {
 
     uint256[50] private __gap;
 
+    /**
+     * @dev Initializes the saving application. Can be called only once.
+     */
     function initialize(address _controller) public initializer {
         require(_controller != address(0x0), "controller not set");
         controller = _controller;
@@ -82,14 +89,22 @@ contract SavingApplication is Initializable {
         emit ControllerUpdated(oldController, _controller);
     }
 
-    function setAutoAllocation(address _token, bool _allowed) public {
-        autoAllocation[msg.sender][_token] = _allowed;
-        emit AutoAllocationUpdated(msg.sender, _token, _allowed);
-    }
-
     function _validateAccount(IAccount _account) internal view {
         require(_account.owner() == msg.sender, "not owner");
         require(_account.isOperator(address(this)), "not operator");
+    }
+
+    /**
+     * @dev Updates auto allocation policy on account. When auto allocation is enabled on
+     * an account on a token, strategist can help to deposit account's token to its vault.
+     * @param _account Account to enable auto allocation.
+     * @param _tokne The token to enable auto allocation.
+     * @param _allowed Whether auto allocation is allowed.
+     */
+    function setAutoAllocation(address _account, address _token, bool _allowed) public {
+        _validateAccount(IAccount(_account));
+        autoAllocation[_account][_token] = _allowed;
+        emit AutoAllocationUpdated(_account, _token, _allowed);
     }
 
     /**
@@ -115,7 +130,7 @@ contract SavingApplication is Initializable {
         emit Staked(_account, _vaultId, token, _amount);
 
         if (_claimRewards) {
-            claimRewards(_account, _vaultId);
+            _claimRewards(account, vault);
         }
     }
 
@@ -130,7 +145,6 @@ contract SavingApplication is Initializable {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
         require(_amount > 0, "zero amount");
-
         IAccount account = IAccount(_account);
         _validateAccount(account);
         address token = IVault(vault).want();
@@ -145,7 +159,7 @@ contract SavingApplication is Initializable {
         emit Unstaked(_account, _vaultId, token, _amount);
 
         if (_claimRewards) {
-            claimRewards(_account, _vaultId);
+            _claimRewards(account, vault);
         }
     }
 
@@ -157,7 +171,6 @@ contract SavingApplication is Initializable {
     function exit(address _account, uint256 _vaultId) external {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
-
         IAccount account = IAccount(_account);
         _validateAccount(account);
 
@@ -175,9 +188,16 @@ contract SavingApplication is Initializable {
     function claimRewards(address _account, uint256 _vaultId) public {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
-
         IAccount account = IAccount(_account);
         _validateAccount(account);
+
+        _claimRewards(account, vault);
+    }
+
+    /**
+     * @dev Internal method to claims rewards. Account and vault parameters should be already validated.
+     */
+    function _claimRewards(IAccount _account, IVault _vault) internal {
         address rewardToken = IController(controller).rewardToken();
         bytes memory methodData = abi.encodeWithSignature("claimReward()");
         bytes memory methodResult = account.invoke(address(vault), 0, methodData);
@@ -186,7 +206,12 @@ contract SavingApplication is Initializable {
         emit Claimed(_account, _vaultId, rewardToken, claimAmount);
     }
 
-    function autoStake(address[] memory _accounts, uint256 _vaultId) public onlyStrategist {
+    /**
+     * @dev Deposits into vault on behalf of the accounts provided. This can be only called by strategist.
+     * @param _accounts Accounts to deposit token from.
+     * @param _vaultId ID of the target vault.
+     */
+    function depositForAccounts(address[] memory _accounts, uint256 _vaultId) public onlyStrategist {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
         address token = vault.want();

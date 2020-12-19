@@ -74,6 +74,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
 
     /**
      * @dev Withdraw all funds, normally used when migrating strategies
+     * No withdrawal fee is charged when withdrawing all assets.
      */
     function withdrawAll() public override returns (uint256 balance) {
         require(msg.sender == vault, "not vault");
