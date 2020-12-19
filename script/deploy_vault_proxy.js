@@ -20,6 +20,7 @@ module.exports = async function (callback) {
         const vaultProxy = await AdminUpgradeabilityProxy.new(vault, accounts[0]);
         const proxiedVault = await Vault.at(vaultProxy.address);
 
+        console.log(argv.token);
         await proxiedVault.initialize(argv.token, controller, '', '');  // No token name and symbol override
 
         callback();
