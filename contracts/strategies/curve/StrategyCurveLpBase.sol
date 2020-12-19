@@ -113,4 +113,12 @@ abstract contract StrategyCurveLpBase is StrategyBase {
     function balanceOf() public view override returns (uint256) {
         return balanceOfWant().add(balanceOfPool());
     }
+
+    function _getProtectedTokens() internal virtual override view returns (address[] memory) {
+        address[] memory protectedTokens = new address[](3);
+        protectedTokens[0] = token();
+        protectedTokens[1] = wbtc;
+        protectedTokens[2] = crv;
+        return protectedTokens;
+    }
 }

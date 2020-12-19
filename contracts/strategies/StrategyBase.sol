@@ -2,9 +2,12 @@
 pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
 import "../interfaces/IVault.sol";
 import "../interfaces/IStrategy.sol";
+import "../interfaces/IController.sol";
 
 /**
  * @notice Base contract of Strategy.
@@ -13,6 +16,7 @@ import "../interfaces/IStrategy.sol";
  * One strategy is bound to one vault and cannot be changed.
  */
 abstract contract StrategyBase is IStrategy, Initializable {
+    using SafeERC20Upgradeable for IERC20Upgradeable;
 
     event PerformanceFeeUpdated(uint256 oldPerformanceFee, uint256 newPerformanceFee);
     event WithdrawalFeeUpdated(uint256 oldWithdrawFee, uint256 newWithdrawFee);
@@ -91,4 +95,37 @@ abstract contract StrategyBase is IStrategy, Initializable {
 
         emit WithdrawalFeeUpdated(oldWithdrawalFee, _withdrawalFee);
     }
+
+    /**
+     * @dev Used to salvage any ETH deposited into the vault by mistake.
+     * Only governance or strategist can salvage ETH from the vault.
+     * The salvaged ETH is transferred to treasury for futher operation.
+     */
+    function salvage() public onlyStrategist {
+        uint256 amount = address(this).balance;
+        address payable target = payable(IController(controller()).treasury());
+        target.transfer(amount);
+    }
+
+    /**
+     * @dev Used to salvage any token deposited into the vault by mistake.
+     * The want token cannot be salvaged.
+     * Only governance or strategist can salvage token from the vault.
+     * The salvaged token is transferred to treasury for futhuer operation.
+     * @param _tokenAddress Token address to salvage.
+     */
+    function salvageToken(address _tokenAddress) public onlyStrategist {
+        address[] memory protected = _getProtectedTokens();
+        for (uint256 i = 0; i < protected.length; i++) {
+            require(_tokenAddress != protected[i], "cannot salvage");
+        }
+
+        IERC20Upgradeable target = IERC20Upgradeable(_tokenAddress);
+        target.safeTransfer(IController(controller()).treasury(), target.balanceOf(address(this)));
+    }
+
+    /**
+     * @dev Return the list of tokens that should not be salvaged.
+     */
+    function _getProtectedTokens() internal virtual view returns (address[] memory);
 }
