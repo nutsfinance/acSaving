@@ -23,13 +23,14 @@ contract Controller is IController, Initializable {
     event GovernanceUpdated(address indexed oldGovernance, address indexed newGovernance);
     event RewardTokenUpdated(address indexed oldRewardToken, address indexed newRewardToken);
     event TreasuryUpdated(address indexed oldTreasury, address indexed newTreasury);
-    event VaultAdded(uint256 indexed vaultId, address indexed vaultAddress, address indexed vaultToken);
+    event VaultUpdated(uint256 indexed vaultId, address indexed oldVault, address indexed newVault, uint256 numVaults);
     event RewardAdded(uint256 indexed vaultId, address indexed rewardToken, uint256 rewardAmount);
 
     address public override governance;
     address public override rewardToken;
     address public override treasury;
     uint256 public override numVaults;
+    // Vault ID ==> Vault
     mapping(uint256 => address) public override vaults;
 
     uint256[50] private __gap;
@@ -89,20 +90,29 @@ contract Controller is IController, Initializable {
     }
 
     /**
-     * @dev Add a new vault to the controller. Only governance can add new vault.
-     * Note that there is no duplicate check here, which means one vault might
-     * be represented by multiple vault IDs.
-     * @return ID of the newly added vault.
+     * @dev Set a vault to the controller. Only governance can add new vault.
+     * @param _vaultId ID of the target vault.
+     * @param _vault Address of the target vault. Can be zero address in order to remove a vault from controller.
      */
-    function addVault(address _vault) public onlyGovernance returns (uint256) {
-        require(_vault != address(0x0), "vault not set");
+    function setVault(uint256 _vaultId, address _vault) public onlyGovernance returns (uint256) {
+        address oldVault = vaults[_vaultId];
+        require(_vault != oldVault, "duplicate");
 
-        uint256 vaultId = numVaults;
-        vaults[vaultId] = _vault;
-        numVaults++;
-        emit VaultAdded(vaultId, _vault, IVault(_vault).want());
+        // Check if we are going to set or remove a vault.
+        if (_vault != address(0x0)) {
+            // Going to set a vault. If old vault is empty,
+            // this is adding a new vault.
+            if (oldVault == address(0x0)) {
+                numVaults++;
+            }
+        } else {
+            // Going to remove a vault since _vault = address(0x0)
+            // Old vault can't be address(0x0) since the oldVault != _vault check
+            numVaults--;
+        }
 
-        return vaultId;
+        vaults[_vaultId] = _vault;
+        emit VaultUpdated(_vaultId, oldVault, _vault, numVaults);
     }
 
     /**
