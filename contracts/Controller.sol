@@ -48,14 +48,17 @@ contract Controller is IController, Initializable {
         rewardToken = _rewardToken;
     }
 
+    modifier onlyGovernance() {
+        require(msg.sender == governance, "not governance");
+        _;
+    }
+
     /**
      * @dev Updates the govenance address.
      * Only governance can set a new governance. The governance can be renounced
      * by setting a zero address.
      */
-    function setGovernance(address _governance) public {
-        require(msg.sender == governance, "not governance");
-
+    function setGovernance(address _governance) public onlyGovernance {
         address oldGovernance = governance;
         governance = _governance;
         emit GovernanceUpdated(oldGovernance, _governance);
@@ -65,8 +68,7 @@ contract Controller is IController, Initializable {
      * @dev Updates the rewards token.
      * Only governance can set a new reward token.
      */
-    function setRewardToken(address _rewardToken) public {
-        require(msg.sender == governance, "not governance");
+    function setRewardToken(address _rewardToken) public onlyGovernance {
         require(_rewardToken != address(0x0), "reward token not set");
 
         address oldRewardToken = rewardToken;
@@ -78,8 +80,7 @@ contract Controller is IController, Initializable {
      * @dev Updates the treasury address.
      * Only governance can set a new treasury address.
      */
-    function setTreasury(address _treasury) public {
-        require(msg.sender == governance, "not governance");
+    function setTreasury(address _treasury) public onlyGovernance {
         require(_treasury != address(0x0), "treasury not set");
 
         address oldTreasury = _treasury;
@@ -88,13 +89,12 @@ contract Controller is IController, Initializable {
     }
 
     /**
-     * @dev Add a new vault to the controller.
+     * @dev Add a new vault to the controller. Only governance can add new vault.
      * Note that there is no duplicate check here, which means one vault might
      * be represented by multiple vault IDs.
      * @return ID of the newly added vault.
      */
-    function addVault(address _vault) public returns (uint256) {
-        require(msg.sender == governance, "not governance");
+    function addVault(address _vault) public onlyGovernance returns (uint256) {
         require(_vault != address(0x0), "vault not set");
 
         uint256 vaultId = numVaults;
@@ -106,12 +106,12 @@ contract Controller is IController, Initializable {
     }
 
     /**
-     * @dev Add new rewards to a rewarded vault.
+     * @dev Add new rewards to a rewarded vault. Only governance can add rewards to vaults.
+     * Governance should grant sufficient allowance to Controller in order to add reward.
      * @param _vaultId ID of the vault to have reward.
      * @param _rewardAmount Amount of the reward token to add.
      */
-    function addRewards(uint256 _vaultId, uint256 _rewardAmount) public {
-        require(msg.sender == governance, "not governance");
+    function addRewards(uint256 _vaultId, uint256 _rewardAmount) public onlyGovernance {
         require(vaults[_vaultId] != address(0x0), "vault not exist");
         require(_rewardAmount > 0, "zero amount");
 
