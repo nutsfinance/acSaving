@@ -22,14 +22,14 @@ contract SavingApplication is Initializable {
     event GovernanceUpdated(address indexed oldGovernance, address indexed newGovernance);
     event StrategistUpdated(address indexed oldStrategist, address indexed newStrategist);
     event ControllerUpdated(address indexed oldController, address indexed newController);
-    event AutoAllocationUpdated(address indexed account, address indexed token, bool indexed allowed);
+    event AutoSavingUpdated(address indexed account, address indexed token, bool indexed allowed);
     event Staked(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Unstaked(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Claimed(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Exited(address indexed account, uint256 indexed vaultId);
 
-    // Account ==> Token ==> Auto allocation 
-    mapping(address => mapping(address => bool)) public autoAllocation;
+    // Account ==> Token ==> Auto saving 
+    mapping(address => mapping(address => bool)) public autoSaving;
     address public controller;
     address public governance;
     address public strategist;
@@ -95,16 +95,16 @@ contract SavingApplication is Initializable {
     }
 
     /**
-     * @dev Updates auto allocation policy on account. When auto allocation is enabled on
+     * @dev Updates auto saving policy on account. When auto saving is enabled on
      * an account on a token, strategist can help to deposit account's token to its vault.
-     * @param _account Account to enable auto allocation.
-     * @param _tokne The token to enable auto allocation.
-     * @param _allowed Whether auto allocation is allowed.
+     * @param _account Account to enable auto saving.
+     * @param _token The token to enable auto saving.
+     * @param _allowed Whether auto saving is allowed.
      */
-    function setAutoAllocation(address _account, address _token, bool _allowed) public {
+    function setAutoSaving(address _account, address _token, bool _allowed) public {
         _validateAccount(IAccount(_account));
-        autoAllocation[_account][_token] = _allowed;
-        emit AutoAllocationUpdated(_account, _token, _allowed);
+        autoSaving[_account][_token] = _allowed;
+        emit AutoSavingUpdated(_account, _token, _allowed);
     }
 
     /**
@@ -130,7 +130,7 @@ contract SavingApplication is Initializable {
         emit Staked(_account, _vaultId, token, _amount);
 
         if (_claimRewards) {
-            _claimRewards(account, vault);
+            _claimAllRewards(_account, _vaultId, address(vault));
         }
     }
 
@@ -159,7 +159,7 @@ contract SavingApplication is Initializable {
         emit Unstaked(_account, _vaultId, token, _amount);
 
         if (_claimRewards) {
-            _claimRewards(account, vault);
+            _claimAllRewards(_account, _vaultId, address(vault));
         }
     }
 
@@ -191,16 +191,16 @@ contract SavingApplication is Initializable {
         IAccount account = IAccount(_account);
         _validateAccount(account);
 
-        _claimRewards(account, vault);
+        _claimAllRewards(_account, _vaultId, address(vault));
     }
 
     /**
      * @dev Internal method to claims rewards. Account and vault parameters should be already validated.
      */
-    function _claimRewards(IAccount _account, IVault _vault) internal {
+    function _claimAllRewards(address _account, uint256 _vaultId, address _vault) internal {
         address rewardToken = IController(controller).rewardToken();
         bytes memory methodData = abi.encodeWithSignature("claimReward()");
-        bytes memory methodResult = account.invoke(address(vault), 0, methodData);
+        bytes memory methodResult = IAccount(_account).invoke(_vault, 0, methodData);
         uint256 claimAmount = abi.decode(methodResult, (uint256));
 
         emit Claimed(_account, _vaultId, rewardToken, claimAmount);
@@ -219,7 +219,7 @@ contract SavingApplication is Initializable {
         for (uint256 i = 0; i < _accounts.length; i++) {
             IAccount account = IAccount(_accounts[i]);
             require(account.isOperator(address(this)), "not operator");
-            require(autoAllocation[_accounts[i]][token], "not allowed");
+            require(autoSaving[_accounts[i]][token], "not allowed");
 
             uint256 amount = IERC20Upgradeable(token).balanceOf(_accounts[i]);
             if (amount == 0) continue;
