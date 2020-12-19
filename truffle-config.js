@@ -18,11 +18,13 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 // const infuraKey = "fj4jll3k.....";
 //
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
+
+require('dotenv').config();
 
 module.exports = {
   /**
@@ -34,6 +36,10 @@ module.exports = {
    *
    * $ truffle test --network <network-name>
    */
+
+  api_keys: {
+    etherscan: process.env.ETHERSCAN_KEY
+  },
 
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
@@ -47,6 +53,26 @@ module.exports = {
     //  port: 8545,            // Standard Ethereum port (default: none)
     //  network_id: "*",       // Any network (default: none)
     // },
+
+    development: {
+      host: "127.0.0.1",     // Localhost (default: none)
+      port: 8545,            // Standard Ethereum port (default: none)
+      network_id: "*",       // Any network (default: none)
+    },
+
+    kovan: {
+      provider: () => new HDWalletProvider(process.env.MNENOMIC, "https://kovan.infura.io/v3/" + process.env.INFURA_API_KEY, 0, 10),
+      network_id: 42,         // Kovan's id
+      gas: 900000,           // Gas sent with each transaction (default: ~6700000)
+      gasPrice: 20000000000,  // 20 gwei (in wei) (default: 100 gwei)
+    },
+
+    main: {
+      provider: () => new HDWalletProvider(process.env.MNENOMIC, "https://mainnet.infura.io/v3/" + process.env.INFURA_API_KEY, 0, 10),
+      network_id: 1,          // Main's id
+      gas: 6700000,           // Gas sent with each transaction (default: ~5000000)
+      gasPrice: 125000000000,  // 123 gwei (in wei) (default: 100 gwei)
+    },
 
     // Another network with more advanced options...
     // advanced: {
@@ -77,6 +103,11 @@ module.exports = {
     // }
   },
 
+  plugins: [
+    "solidity-coverage",
+    "truffle-plugin-verify"
+  ],
+
   // Set default mocha options here, use special reporters etc.
   mocha: {
     // timeout: 100000
@@ -86,7 +117,7 @@ module.exports = {
   compilers: {
     solc: {
       version: "0.6.12",    // Fetch exact version from solc-bin (default: truffle's version)
-      // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
+      docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,
