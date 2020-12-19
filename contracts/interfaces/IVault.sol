@@ -58,12 +58,14 @@ interface IVault {
      * @dev Whether the vault is now in emergency mode.
      * When the vault is in emergency mode:
      * 1. No deposit is allowed (but withdraw is allowed);
-     * 2. No new active strategy can be set.
+     * 2. The active strategy is set to zero address and all assets are withdrawn to vault.
+     * 3. No new active strategy can be set.
      */
     function emergencyMode() external view returns (bool);
 
     /**
      * @dev Notifies the vault that a new reward is added.
+     * The reward token is set in Controller.rewardToken().
      * @param _rewardAmount Amount of reward that is newly added to the vault.
      */
     function notifyRewardAmount(uint256 _rewardAmount) external;

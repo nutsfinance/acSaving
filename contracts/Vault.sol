@@ -15,7 +15,9 @@ import "./VaultBase.sol";
  * @notice A vault with rewards.
  *
  * A vault not only pools token to seek best yield, but also receive reward token,
- * i.e. ACoconut as additional yield.
+ * i.e. ACoconut as additional yield. This removes the need to deposit and stake to
+ * to earn rewards: User only needs to deposit into the vault to earn yield, and automatically
+ * receives rewards in proportion to their shares in the vault.
  */
 contract Vault is VaultBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
