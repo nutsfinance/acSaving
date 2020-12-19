@@ -25,7 +25,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
-    address public override want;
+    address public override token;
     address public override controller;
     address public override strategist;
     mapping(address => bool) public override approvedStrategies;
@@ -49,35 +49,35 @@ contract VaultBase is ERC20Upgradeable, IVault {
 
     /**
      * @dev Initializes the Vault contract. Can be called only once.
-     * @param _want The token that the vault pools to seak return.
+     * @param _token The token that the vault pools to seak return.
      * @param _controller The Controller contract that manages the vaults.
      * @param _nameOverride Provides a custom vault token name. Use default if empty.
      * @param _symbolOverride Provides a custom vault token symbol. Use default if empty.
      */
-    function initialize(address _want, address _controller, string memory _nameOverride, string memory _symbolOverride) public virtual initializer {
-        require(_want != address(0x0), "want not set");
+    function initialize(address _token, address _controller, string memory _nameOverride, string memory _symbolOverride) public virtual initializer {
+        require(_token != address(0x0), "want not set");
         require(_controller != address(0x0), "controller not set");
 
-        want = _want;
+        token = _token;
         controller = _controller;
         strategist = msg.sender;
 
-        ERC20Upgradeable token = ERC20Upgradeable(_want);
+        ERC20Upgradeable want = ERC20Upgradeable(_token);
         string memory name;
         string memory symbol;
         if (bytes(_nameOverride).length > 0) {
             name = _nameOverride;
         } else {
-            name = string(abi.encodePacked(token.name(), " Vault"));
+            name = string(abi.encodePacked(want.name(), " Vault"));
         }
         if (bytes(_symbolOverride).length > 0) {
             symbol = _symbolOverride;
         } else {
-            symbol = string(abi.encodePacked(token.symbol(), "v"));
+            symbol = string(abi.encodePacked(want.symbol(), "v"));
         }
         __ERC20_init(name, symbol);
         // The vault should have the same decimals as the want token.
-        _setupDecimals(token.decimals());
+        _setupDecimals(want.decimals());
     }
 
     /**
@@ -121,9 +121,9 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * @dev Returns the total balance in both vault and strategy.
      */
     function balance() public override view returns (uint256) {
-        IERC20Upgradeable token = IERC20Upgradeable(want);
-        return activeStrategy == address(0x0) ? token.balanceOf(address(this)) :
-            token.balanceOf(address(this)).add(IStrategy(activeStrategy).balanceOf());
+        IERC20Upgradeable want = IERC20Upgradeable(token);
+        return activeStrategy == address(0x0) ? want.balanceOf(address(this)) :
+            want.balanceOf(address(this)).add(IStrategy(activeStrategy).balanceOf());
     }
 
     /**
@@ -197,9 +197,9 @@ contract VaultBase is ERC20Upgradeable, IVault {
      */
     function earn() public onlyStrategist notEmergencyMode {
         if (activeStrategy == address(0x0)) return;
-        IERC20Upgradeable token = IERC20Upgradeable(want);
-        uint256 _bal = token.balanceOf(address(this));
-        token.safeTransfer(activeStrategy, _bal);
+        IERC20Upgradeable want = IERC20Upgradeable(token);
+        uint256 _bal = want.balanceOf(address(this));
+        want.safeTransfer(activeStrategy, _bal);
         IStrategy(activeStrategy).deposit();
     }
 
@@ -220,16 +220,16 @@ contract VaultBase is ERC20Upgradeable, IVault {
      */
     function deposit(uint256 _amount) public virtual notEmergencyMode blockUnlocked {
         require(_amount > 0, "zero amount");
-        IERC20Upgradeable token = IERC20Upgradeable(want);
+        IERC20Upgradeable want = IERC20Upgradeable(token);
         // If MAX is provided, deposits all balance.
         if (_amount == uint256(-1)) {
-            _amount = token.balanceOf(msg.sender);
+            _amount = want.balanceOf(msg.sender);
         }
 
         uint256 _pool = balance();
-        uint256 _before = token.balanceOf(address(this));
-        token.safeTransferFrom(msg.sender, address(this), _amount);
-        uint256 _after = token.balanceOf(address(this));
+        uint256 _before = want.balanceOf(address(this));
+        want.safeTransferFrom(msg.sender, address(this), _amount);
+        uint256 _after = want.balanceOf(address(this));
         _amount = _after.sub(_before); // Additional check for deflationary tokens
         uint256 shares = 0;
         if (totalSupply() == 0) {
@@ -240,7 +240,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
         _mint(msg.sender, shares);
         _updateLockBlock();
 
-        emit Deposited(msg.sender, address(token), _amount, shares);
+        emit Deposited(msg.sender, address(want), _amount, shares);
     }
 
     /**
@@ -250,7 +250,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      */
     function withdraw(uint256 _shares) public virtual blockUnlocked {
         require(_shares > 0, "zero amount");
-        IERC20Upgradeable token = IERC20Upgradeable(want);
+        IERC20Upgradeable want = IERC20Upgradeable(token);
         // If MAX is provided, withdraws all shares.
         if (_shares == uint256(-1)) {
             _shares = balanceOf(msg.sender);
@@ -259,22 +259,22 @@ contract VaultBase is ERC20Upgradeable, IVault {
         _burn(msg.sender, _shares);
 
         // Check balance
-        uint256 b = token.balanceOf(address(this));
+        uint256 b = want.balanceOf(address(this));
         if (b < r) {
             uint256 _withdraw = r.sub(b);
             // Ideally this should not happen. Put here for extra safety.
             require(activeStrategy != address(0x0), "no strategy");
             IStrategy(activeStrategy).withdraw(_withdraw);
-            uint256 _after = token.balanceOf(address(this));
+            uint256 _after = want.balanceOf(address(this));
             uint256 _diff = _after.sub(b);
             if (_diff < _withdraw) {
                 r = b.add(_diff);
             }
         }
 
-        token.safeTransfer(msg.sender, r);
+        want.safeTransfer(msg.sender, r);
         _updateLockBlock();
-        emit Withdrawn(msg.sender, address(token), r, _shares);
+        emit Withdrawn(msg.sender, address(want), r, _shares);
     }
 
     /**
@@ -312,10 +312,10 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * @param _tokenAddress Token address to salvage.
      */
     function salvageToken(address _tokenAddress) public onlyStrategist {
-        require(_tokenAddress != want, "cannot salvage");
+        require(_tokenAddress != token, "cannot salvage");
 
-        IERC20Upgradeable token = IERC20Upgradeable(_tokenAddress);
-        token.safeTransfer(IController(controller).treasury(), token.balanceOf(address(this)));
+        IERC20Upgradeable target = IERC20Upgradeable(_tokenAddress);
+        target.safeTransfer(IController(controller).treasury(), target.balanceOf(address(this)));
     }
 
     /**

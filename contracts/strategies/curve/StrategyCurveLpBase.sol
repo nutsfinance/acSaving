@@ -43,11 +43,11 @@ abstract contract StrategyCurveLpBase is StrategyBase {
      * @dev Deposits all renCRV into Curve liquidity gauge to earn CRV.
      */
     function deposit() public override {
-        IERC20Upgradeable token = IERC20Upgradeable(want());
-        uint256 _want = token.balanceOf(address(this));
+        IERC20Upgradeable want = IERC20Upgradeable(token());
+        uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {
-            token.safeApprove(guage, 0);
-            token.safeApprove(guage, _want);
+            want.safeApprove(guage, 0);
+            want.safeApprove(guage, _want);
             ICurveGauge(guage).deposit(_want);
         }
     }
@@ -57,19 +57,19 @@ abstract contract StrategyCurveLpBase is StrategyBase {
      */
     function withdraw(uint256 _amount) public override {
         require(msg.sender == vault, "not vault");
-        IERC20Upgradeable token = IERC20Upgradeable(want());
-        uint256 _balance = token.balanceOf(address(this));
+        IERC20Upgradeable want = IERC20Upgradeable(token());
+        uint256 _balance = want.balanceOf(address(this));
         if (_balance < _amount) {
             _amount = _withdrawSome(_amount.sub(_balance));
             _amount = _amount.add(_balance);
         }
         if (withdrawalFee > 0) {
             uint256 _feeAmount = _amount.mul(withdrawalFee).div(FEE_MAX);
-            token.safeTransfer(IController(controller()).treasury(), _feeAmount);
+            want.safeTransfer(IController(controller()).treasury(), _feeAmount);
             _amount = _amount.sub(_feeAmount);
         }
 
-        token.safeTransfer(vault, _amount);
+        want.safeTransfer(vault, _amount);
     }
 
     /**
@@ -80,9 +80,9 @@ abstract contract StrategyCurveLpBase is StrategyBase {
         require(msg.sender == vault, "not vault");
         ICurveGauge(guage).withdraw(ICurveGauge(guage).balanceOf(address(this)));
 
-        IERC20Upgradeable token = IERC20Upgradeable(want());
-        balance = token.balanceOf(address(this));
-        token.safeTransfer(vault, balance);
+        IERC20Upgradeable want = IERC20Upgradeable(token());
+        balance = want.balanceOf(address(this));
+        want.safeTransfer(vault, balance);
     }
 
     /**
@@ -97,7 +97,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
      * @dev Returns the amount of tokens deposited in the strategy.
      */
     function balanceOfWant() public view returns (uint256) {
-        return IERC20Upgradeable(want()).balanceOf(address(this));
+        return IERC20Upgradeable(token()).balanceOf(address(this));
     }
 
     /**

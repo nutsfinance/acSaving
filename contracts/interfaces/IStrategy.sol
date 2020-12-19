@@ -22,9 +22,9 @@ interface IStrategy {
 
     /**
      * @dev Returns the token that the vault pools to seek yield.
-     * Should be the same as Vault.want().
+     * Should be the same as Vault.token().
      */
-    function want() external view returns (address);
+    function token() external view returns (address);
 
     /**
      * @dev Returns the governance of the Strategy.

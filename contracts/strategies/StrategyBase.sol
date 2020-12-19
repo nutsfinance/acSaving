@@ -30,10 +30,10 @@ abstract contract StrategyBase is IStrategy, Initializable {
 
     /**
      * @dev Returns the token that the vault pools to seek yield.
-     * Should be the same as Vault.want().
+     * Should be the same as Vault.token().
      */
-    function want() public override view returns (address) {
-        return IVault(vault).want();
+    function token() public override view returns (address) {
+        return IVault(vault).token();
     }
 
     /**

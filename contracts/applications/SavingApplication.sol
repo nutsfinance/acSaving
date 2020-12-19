@@ -137,7 +137,7 @@ contract SavingApplication is Initializable {
 
         IAccount account = IAccount(_account);
         _validateAccount(account);
-        address token = vault.want();
+        address token = vault.token();
         account.approveToken(token, address(vault), _amount);
 
         bytes memory methodData = abi.encodeWithSignature("deposit(uint256)", _amount);
@@ -163,7 +163,7 @@ contract SavingApplication is Initializable {
         require(_amount > 0, "zero amount");
         IAccount account = IAccount(_account);
         _validateAccount(account);
-        address token = IVault(vault).want();
+        address token = IVault(vault).token();
 
         // Important: Need to convert token amount to vault share!
         uint256 totalBalance = vault.balance();
@@ -230,7 +230,7 @@ contract SavingApplication is Initializable {
     function depositForAccounts(address[] memory _accounts, uint256 _vaultId) public onlyStrategist {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
-        address token = vault.want();
+        address token = vault.token();
         // If the account's balance is below the threshold, no op.
         uint256 threshold = autoSavingThreshold[token];
 

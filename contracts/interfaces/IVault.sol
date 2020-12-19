@@ -13,7 +13,7 @@ interface IVault {
     /**
      * @dev Returns the token that the vault pools.
      */
-    function want() external view returns (address);
+    function token() external view returns (address);
 
     /**
      * @dev Returns the Controller address.
