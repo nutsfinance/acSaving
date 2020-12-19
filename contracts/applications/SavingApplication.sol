@@ -23,6 +23,7 @@ contract SavingApplication is Initializable {
     event StrategistUpdated(address indexed oldStrategist, address indexed newStrategist);
     event ControllerUpdated(address indexed oldController, address indexed newController);
     event AutoSavingUpdated(address indexed account, address indexed token, bool indexed allowed);
+    event AutoSavingThresholdUpdated(address indexed token, uint256 oldValue, uint256 newValue);
     event Deposited(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Withdrawn(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
     event Claimed(address indexed account, uint256 indexed vaultId, address token, uint256 amount);
@@ -30,6 +31,8 @@ contract SavingApplication is Initializable {
 
     // Account ==> Token ==> Auto saving 
     mapping(address => mapping(address => bool)) public autoSaving;
+    // Token ==> Auto saving threshold
+    mapping(address => uint256) public autoSavingThreshold;
     address public controller;
     address public governance;
     address public strategist;
@@ -105,6 +108,19 @@ contract SavingApplication is Initializable {
         _validateAccount(IAccount(_account));
         autoSaving[_account][_token] = _allowed;
         emit AutoSavingUpdated(_account, _token, _allowed);
+    }
+
+    /**
+     * @dev Updates auto saving threshold for a token. If the token balance of an account is
+     * below the threshold, strategist won't help to deposit the account's token even if auto saving
+     * is enabled on the account for that token.
+     * @param _token The token to set auto saving threshold.
+     * @param _value The new auto saving threshold to that token.
+     */
+    function setAutoSavingThreshold(address _token, uint256 _value) public onlyStrategist {
+        uint256 oldValue = autoSavingThreshold[_token];
+        autoSavingThreshold[_token] = _value;
+        emit AutoSavingThresholdUpdated(_token, oldValue, _value);
     }
 
     /**
@@ -215,6 +231,8 @@ contract SavingApplication is Initializable {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
         address token = vault.want();
+        // If the account's balance is below the threshold, no op.
+        uint256 threshold = autoSavingThreshold[token];
 
         for (uint256 i = 0; i < _accounts.length; i++) {
             IAccount account = IAccount(_accounts[i]);
@@ -222,7 +240,8 @@ contract SavingApplication is Initializable {
             require(autoSaving[_accounts[i]][token], "not allowed");
 
             uint256 amount = IERC20Upgradeable(token).balanceOf(_accounts[i]);
-            if (amount == 0) continue;
+            // No op if the account's balance is under threshold.
+            if (amount < threshold) continue;
             account.approveToken(token, address(vault), amount);
 
             bytes memory methodData = abi.encodeWithSignature("deposit(uint256)", amount);
