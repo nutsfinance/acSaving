@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
 
 import "./Proxy.sol";
 
@@ -44,7 +44,7 @@ contract BaseUpgradeabilityProxy is Proxy {
    */
     function _setImplementation(address newImplementation) internal {
         require(
-            Address.isContract(newImplementation),
+            AddressUpgradeable.isContract(newImplementation),
             "Implementation not set"
         );
 
