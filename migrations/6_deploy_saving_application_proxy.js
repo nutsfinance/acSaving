@@ -11,7 +11,7 @@ const deploySavingApplicationProxy = async (deployer, accounts) => {
     const proxiedSavingApplication = await SavingApplication.at(savingApplicationProxy.address);
     console.log('Saving application proxy: ' + savingApplicationProxy.address);
 
-    const controller = (await ControllerProxy.deployed()).address();
+    const controller = (await ControllerProxy.deployed()).address;
     console.log('Controller: ' + controller);
     await proxiedSavingApplication.initialize(controller);
 }
