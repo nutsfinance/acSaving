@@ -22,8 +22,7 @@ contract StrategyCurveHbtcCrv is StrategyCurveLpBase {
     address public constant HBTCCRV_GUAGE = address(0x4c18E409Dc8619bFb6a1cB56D114C3f592E0aE79); // hbtcCrv guage
     address public constant HBTC_SWAP = address(0x4CA9b3063Ec5866A4B82E437059D2C43d1be596F); // HBTC swap
 
-    function initialize(address _vault) public initializer {
-        __StrategyCurveLpBase__initialize(_vault, HBTCCRV_GUAGE, HBTC_SWAP);
+    constructor(address _vault) StrategyCurveLpBase(_vault, HBTCCRV_GUAGE, HBTC_SWAP) public {
     }
     
     /**

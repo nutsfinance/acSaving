@@ -1,4 +1,4 @@
-const argv = require('yargs').argv;
+const argv = require('yargs').option('token', {type: 'string'}).argv;
 const Vault = artifacts.require("Vault");
 const ControllerProxy = artifacts.require("ControllerProxy");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
@@ -16,11 +16,12 @@ module.exports = async function (callback) {
         console.log('Vault address: ' + vault);
         const controller = (await ControllerProxy.deployed()).address;
         console.log('Controller address: ' + controller);
+        console.log('Token: ' + argv.token);
         
         const vaultProxy = await AdminUpgradeabilityProxy.new(vault, accounts[0]);
+        console.log('Vault proxy: ' + vaultProxy.address);
         const proxiedVault = await Vault.at(vaultProxy.address);
 
-        console.log(argv.token);
         await proxiedVault.initialize(argv.token, controller, '', '');  // No token name and symbol override
 
         callback();
