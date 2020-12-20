@@ -300,7 +300,8 @@ contract VaultBase is ERC20Upgradeable, IVault {
     function salvage() public onlyStrategist {
         uint256 amount = address(this).balance;
         address payable target = payable(IController(controller).treasury());
-        target.transfer(amount);
+        (bool success, ) = target.call{value: amount}(new bytes(0));
+        require(success, 'ETH salvage failed');
     }
 
     /**
