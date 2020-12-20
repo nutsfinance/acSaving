@@ -220,6 +220,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      */
     function deposit(uint256 _amount) public virtual notEmergencyMode blockUnlocked {
         require(_amount > 0, "zero amount");
+        _updateLockBlock();
         IERC20Upgradeable want = IERC20Upgradeable(token);
         // If MAX is provided, deposits all balance.
         if (_amount == uint256(-1)) {
@@ -238,7 +239,6 @@ contract VaultBase is ERC20Upgradeable, IVault {
             shares = (_amount.mul(totalSupply())).div(_pool);
         }
         _mint(msg.sender, shares);
-        _updateLockBlock();
 
         emit Deposited(msg.sender, address(want), _amount, shares);
     }
@@ -250,6 +250,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      */
     function withdraw(uint256 _shares) public virtual blockUnlocked {
         require(_shares > 0, "zero amount");
+        _updateLockBlock();
         IERC20Upgradeable want = IERC20Upgradeable(token);
         // If MAX is provided, withdraws all shares.
         if (_shares == uint256(-1)) {
@@ -273,7 +274,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
         }
 
         want.safeTransfer(msg.sender, r);
-        _updateLockBlock();
+        
         emit Withdrawn(msg.sender, address(want), r, _shares);
     }
 
@@ -281,7 +282,6 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * @dev Add lock to transfer so that it can not happen in the same block as deposit and withdraw.
      */
     function transfer(address recipient, uint256 amount) public virtual override blockUnlocked returns (bool) {
-        _updateLockBlock();
         return super.transfer(recipient, amount);
     }
 
@@ -289,7 +289,6 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * @dev Add lock to transfer so that it can not happen in the same block as deposit and withdraw.
      */
     function transferFrom(address sender, address recipient, uint256 amount) public virtual override blockUnlocked returns (bool) {
-        _updateLockBlock();
         return super.transferFrom(sender, recipient, amount);
     }
 
