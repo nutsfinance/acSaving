@@ -85,8 +85,10 @@ abstract contract StrategyCurveLpBase is StrategyBase {
 
     /**
      * @dev Withdraw some tokens from the gauge.
+     * If the inherited strategy withdraws an actual amount different from _amount,
+     * should override this method to return the actual amount withdrawn.
      */
-    function _withdrawSome(uint256 _amount) internal returns (uint256) {
+    function _withdrawSome(uint256 _amount) internal virtual returns (uint256) {
         ICurveGauge(guage).withdraw(_amount);
         return _amount;
     }
