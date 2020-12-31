@@ -22,18 +22,19 @@ abstract contract StrategyCurveLpBase is StrategyBase {
     // Constants
     address public constant crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);  // CRV token
     address public constant mintr = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0); // Token minter
-    address public constant uniswap = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);  // UniswapV2Router02
+    address public constant uniswap = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);  // Uniswap RouterV2
+    address public constant sushiswap = address(0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F);    // Sushiswap RouterV2
     address public constant weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // WETH token. Used for crv -> weth -> wbtc route
     address public constant wbtc = address(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599); // WBTC token. Used for crv -> weth -> wbtc route
 
     // Pool parameters
-    address public guage;
+    address public gauge;
     address public curve;
 
-    constructor(address _vault, address _guage, address _curve) StrategyBase(_vault) internal {
-        require(_guage != address(0x0), "guage not set");
+    constructor(address _vault, address _gauge, address _curve) StrategyBase(_vault) internal {
+        require(_gauge != address(0x0), "gauge not set");
         require(_curve != address(0x0), "curve not set");
-        guage = _guage;
+        gauge = _gauge;
         curve = _curve;
     }
 
@@ -44,9 +45,9 @@ abstract contract StrategyCurveLpBase is StrategyBase {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {
-            want.safeApprove(guage, 0);
-            want.safeApprove(guage, _want);
-            ICurveGauge(guage).deposit(_want);
+            want.safeApprove(gauge, 0);
+            want.safeApprove(gauge, _want);
+            ICurveGauge(gauge).deposit(_want);
         }
     }
 
@@ -76,7 +77,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
      */
     function withdrawAll() public override returns (uint256 balance) {
         require(msg.sender == vault, "not vault");
-        ICurveGauge(guage).withdraw(ICurveGauge(guage).balanceOf(address(this)));
+        ICurveGauge(gauge).withdraw(ICurveGauge(gauge).balanceOf(address(this)));
 
         IERC20Upgradeable want = IERC20Upgradeable(token());
         balance = want.balanceOf(address(this));
@@ -89,7 +90,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
      * should override this method to return the actual amount withdrawn.
      */
     function _withdrawSome(uint256 _amount) internal virtual returns (uint256) {
-        ICurveGauge(guage).withdraw(_amount);
+        ICurveGauge(gauge).withdraw(_amount);
         return _amount;
     }
 
@@ -104,7 +105,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
      * @dev Returns the amount of tokens deposited in the gauge.
      */
     function balanceOfPool() public view returns (uint256) {
-        return ICurveGauge(guage).balanceOf(address(this));
+        return ICurveGauge(gauge).balanceOf(address(this));
     }
 
     /**

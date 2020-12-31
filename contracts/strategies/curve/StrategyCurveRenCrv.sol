@@ -19,10 +19,10 @@ contract StrategyCurveRenCrv is StrategyCurveLpBase {
     using SafeMathUpgradeable for uint256;
 
     // Pool parameters
-    address public constant RENCRV_GUAGE = address(0xB1F2cdeC61db658F091671F5f199635aEF202CAC); // renCrv guage
+    address public constant RENCRV_GAUGE = address(0xB1F2cdeC61db658F091671F5f199635aEF202CAC); // renCrv gauge
     address public constant REN_SWAP = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B); // REN swap
 
-    constructor(address _vault) StrategyCurveLpBase(_vault, RENCRV_GUAGE, REN_SWAP) public {
+    constructor(address _vault) StrategyCurveLpBase(_vault, RENCRV_GAUGE, REN_SWAP) public {
     }
     
     /**
@@ -31,7 +31,7 @@ contract StrategyCurveRenCrv is StrategyCurveLpBase {
     function harvest() public override {
         require(msg.sender == vault || msg.sender == governance() || msg.sender == strategist(), "not vault");
         // Claims CRV from Curve
-        ICurveMinter(mintr).mint(guage);
+        ICurveMinter(mintr).mint(gauge);
         uint256 _crv = IERC20Upgradeable(crv).balanceOf(address(this));
 
         // Uniswap: CRV --> WETH --> WBTC
