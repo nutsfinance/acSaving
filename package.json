@@ -26,6 +26,7 @@
   "homepage": "https://github.com/nutsfinance/acSaving#readme",
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^3.3.0",
+    "@openzeppelin/test-helpers": "^0.5.10",
     "@openzeppelin/upgrades": "^2.8.0",
     "@truffle/hdwallet-provider": "^1.2.0",
     "solidity-coverage": "^0.7.13",

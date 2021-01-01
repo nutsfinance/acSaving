@@ -57,7 +57,7 @@ contract StrategyCurveObtcCrv is StrategyCurveLpBase {
         // Step 4: Sushiswap BOR --> WETH --> WBTC
         if (_bor > 0) {
             IERC20Upgradeable(bor).safeApprove(sushiswap, 0);
-            IERC20Upgradeable(bor).safeApprove(sushiswap, _crv);
+            IERC20Upgradeable(bor).safeApprove(sushiswap, _bor);
 
             address[] memory path = new address[](3);
             path[0] = bor;
