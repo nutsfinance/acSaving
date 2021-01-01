@@ -7,6 +7,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
 import "./StrategyCurveLpBase.sol";
+import "../../interfaces/IVault.sol";
 import "../../interfaces/curve/ICurveFi.sol";
 import "../../interfaces/curve/ICurveMinter.sol";
 import "../../interfaces/uniswap/IUniswapRouter.sol";
@@ -30,6 +31,7 @@ contract StrategyCurveHbtcCrv is StrategyCurveLpBase {
      */
     function harvest() public override {
         require(msg.sender == vault || msg.sender == governance() || msg.sender == strategist(), "not vault");
+        uint256 sharePriceBefore = IVault(vault).getPricePerFullShare();
         // Claims CRV from Curve
         ICurveMinter(mintr).mint(gauge);
         uint256 _crv = IERC20Upgradeable(crv).balanceOf(address(this));
@@ -65,6 +67,7 @@ contract StrategyCurveHbtcCrv is StrategyCurveLpBase {
         }
         deposit();
 
-        emit Harvested(address(want), _want, _feeAmount);
+        uint256 sharePriceAfter = IVault(vault).getPricePerFullShare();
+        emit Harvested(address(want), _want, _feeAmount, sharePriceBefore, sharePriceAfter);
     }
 }

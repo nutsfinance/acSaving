@@ -40,6 +40,11 @@ interface IVault {
     function balance() external view returns (uint256);
 
     /**
+     * @dev Returns the current share price of the vault.
+     */
+    function getPricePerFullShare() external view returns (uint256);
+
+    /**
      * @dev Checks whether a strategy is approved on the vault.
      * Only governance can approve and revoke strategies.
      * @param _strategy Strategy address to check.

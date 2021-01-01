@@ -17,7 +17,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
-    event Harvested(address indexed token, uint256 amount, uint256 feeAmount);
+    event Harvested(address indexed token, uint256 amount, uint256 feeAmount, uint256 sharePriceBefore, uint256 sharePriceAfter);
 
     // Constants
     address public constant crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);  // CRV token

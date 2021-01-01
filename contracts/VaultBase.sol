@@ -321,7 +321,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
     /**
      * @dev Returns the number of vault token per share is worth.
      */
-    function getPricePerFullShare() public view returns (uint256) {
+    function getPricePerFullShare() public override view returns (uint256) {
         if (totalSupply() == 0) return 0;
         return balance().mul(1e18).div(totalSupply());
     }
