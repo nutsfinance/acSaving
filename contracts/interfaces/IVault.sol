@@ -69,6 +69,20 @@ interface IVault {
     function emergencyMode() external view returns (bool);
 
     /**
+     * @dev Deposit some balance to the vault.
+     * Deposit is not allowed when the vault is in emergency mode.
+     * If one deposit is completed, no new deposit/withdraw/transfer is allowed in the same block.
+     */
+    function deposit(uint256 _amount) external;
+
+    /**
+     * @dev Withdraws some balance out of the vault.
+     * Withdraw is allowed even in emergency mode.
+     * If one withdraw is completed, no new deposit/withdraw/transfer is allowed in the same block.
+     */
+    function withdraw(uint256 _shares) external;
+
+    /**
      * @dev Notifies the vault that a new reward is added.
      * The reward token is set in Controller.rewardToken().
      * @param _rewardAmount Amount of reward that is newly added to the vault.

@@ -8,6 +8,8 @@ pragma solidity 0.6.12;
 interface ICurveFi {
     function get_virtual_price() external view returns (uint256);
 
+    function remove_liquidity_one_coin(uint256 token_amount, uint128 iint128, uint256 min_amount) external;
+
     // ren pool/hbtc pool
     function add_liquidity(
         uint256[2] calldata amounts,

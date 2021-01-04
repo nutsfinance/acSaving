@@ -218,7 +218,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * Deposit is not allowed when the vault is in emergency mode.
      * If one deposit is completed, no new deposit/withdraw/transfer is allowed in the same block.
      */
-    function deposit(uint256 _amount) public virtual notEmergencyMode blockUnlocked {
+    function deposit(uint256 _amount) public virtual override notEmergencyMode blockUnlocked {
         require(_amount > 0, "zero amount");
         _updateLockBlock();
         IERC20Upgradeable want = IERC20Upgradeable(token);
@@ -248,7 +248,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * Withdraw is allowed even in emergency mode.
      * If one withdraw is completed, no new deposit/withdraw/transfer is allowed in the same block.
      */
-    function withdraw(uint256 _shares) public virtual blockUnlocked {
+    function withdraw(uint256 _shares) public virtual override blockUnlocked {
         require(_shares > 0, "zero amount");
         _updateLockBlock();
         IERC20Upgradeable want = IERC20Upgradeable(token);
