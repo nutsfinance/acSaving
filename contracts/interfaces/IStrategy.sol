@@ -68,5 +68,8 @@ interface IStrategy {
      */
     function withdrawAll() external returns (uint256);
 
+    /**
+     * @dev Harvest yield from the market.
+     */
     function harvest() external;
 }

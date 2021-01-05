@@ -130,12 +130,22 @@ abstract contract StrategyCurveBase is StrategyBase {
     function withdrawAll() public override returns (uint256 balance) {
         require(msg.sender == vault, "not vault");
 
-        uint256 _lpVault = IERC20Upgradeable(lpVault).balanceOf(address(this));
-        if (_lpVault > 0) {
-            // Withdraws all shares from LP vault.
-            IVault(lpVault).withdraw(_lpVault);
-            // Withdraws all tokens from LP.
-            return _withdrawOne(IERC20Upgradeable(IVault(lpVault).token()).balanceOf(address(this)));
+        // Exists from the lp vault, withdraws all lp tokens and claims all rewards.
+        IVault(lpVault).exit();
+
+        // Withdraws want token from the withdrawn lp tokens.
+        uint256 _lp = IERC20Upgradeable(IVault(lpVault).token()).balanceOf(address(this));
+        if (_lp > 0) {
+            balance = _withdrawOne(_lp);
+        }
+
+        // Distributes the reward token to the vault.
+        IERC20Upgradeable rewardToken = IERC20Upgradeable(IController(controller()).rewardToken());
+        uint256 _reward = rewardToken.balanceOf(address(this));
+        if (_reward > 0) {
+            rewardToken.safeApprove(vault, 0);
+            rewardToken.safeApprove(vault, _reward);
+            IVault(lpVault).addReward(_reward);
         }
     }
 
@@ -199,8 +209,22 @@ abstract contract StrategyCurveBase is StrategyBase {
         emit SlippageUpdated(oldSlippage, _slippage);
     }
 
+    /**
+     * @dev Harvest reward from LP vault and distributes to the vault users.
+     */
     function harvest() public override {
-        // No op
+        // The actual yield harvest is done together in the lp vault,
+        // so yield harvest on want token is performed here.
+        // Instead, we harvest the reward token from the LP vault and distributes
+        // it in the vaule.
+        IVault(lpVault).claimReward();
+        IERC20Upgradeable rewardToken = IERC20Upgradeable(IController(controller()).rewardToken());
+        uint256 _reward = rewardToken.balanceOf(address(this));
+        if (_reward > 0) {
+            rewardToken.safeApprove(vault, 0);
+            rewardToken.safeApprove(vault, _reward);
+            IVault(lpVault).addReward(_reward);
+        }
     }
 
     /**

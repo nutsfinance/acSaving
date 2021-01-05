@@ -325,5 +325,19 @@ contract VaultBase is ERC20Upgradeable, IVault {
         return balance().mul(1e18).div(totalSupply());
     }
 
-    function notifyRewardAmount(uint256 _rewardAmount) public virtual override {}
+    function exit() public virtual override {
+        withdraw(uint256(-1));
+    }
+
+    function claimReward() public virtual override returns (uint256) {
+        revert("reward is not supported");
+    }
+
+    function notifyRewardAmount(uint256) public virtual override {
+        revert("reward is not supported");
+    }
+
+    function addReward(uint256) public virtual override {
+        revert("reward is not supported");
+    }
 }

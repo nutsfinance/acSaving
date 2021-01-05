@@ -34,7 +34,7 @@ contract Vault is VaultBase {
 
     uint256[50] private __gap;
 
-    event RewardAdded(address indexed rewardToken, uint256 rewardAmount);
+    event RewardAdded(address indexed rewardToken, uint256 rewardAmount, uint256 rewardFinish);
     event RewardClaimed(address indexed rewardToken, address indexed user, uint256 rewardAmount);
 
     modifier updateReward(address _account) {
@@ -84,7 +84,7 @@ contract Vault is VaultBase {
     /**
      * @dev Withdraws all balance and all rewards from the vault.
      */
-    function exit() external {
+    function exit() public virtual override {
         // Withdraws all balance on exit.
         withdraw(uint256(-1));
         claimReward();
@@ -93,7 +93,7 @@ contract Vault is VaultBase {
     /**
      * @dev Claims all rewards from the vault.
      */
-    function claimReward() public updateReward(msg.sender) returns (uint256) {
+    function claimReward() public virtual override updateReward(msg.sender) returns (uint256) {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             claimed[msg.sender] = claimed[msg.sender].add(reward);
@@ -108,9 +108,10 @@ contract Vault is VaultBase {
 
     /**
      * @dev Notifies the vault that new reward is added. All rewards will be distributed linearly in 7 days.
+     * Only controller can call this function as it modifies the reward vesting schedule.
      * @param _reward Amount of reward token to add.
      */
-    function notifyRewardAmount(uint256 _reward) public override updateReward(address(0)) {
+    function notifyRewardAmount(uint256 _reward) public virtual override updateReward(address(0)) {
         require(msg.sender == controller, "not controller");
 
         if (block.timestamp >= periodFinish) {
@@ -123,6 +124,34 @@ contract Vault is VaultBase {
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
 
-        emit RewardAdded(IController(controller).rewardToken(), _reward);
+        emit RewardAdded(IController(controller).rewardToken(), _reward, periodFinish);
+    }
+
+    /**
+     * @dev Adds rewards to the vault. This function DOES NOT change the reward vesting schedule.
+     * Therefore, it allows others to donate to the vault!
+     * @param _reward Amount of reward that is newly added to the vault.
+     */
+    function addReward(uint256 _reward) public virtual override updateReward(address(0)) {
+        // We don't perform caller check here, which means anyone can donate rewards to the vault.
+        address rewardToken = IController(controller).rewardToken();
+        IERC20Upgradeable(rewardToken).safeTransferFrom(msg.sender, address(this), _reward);
+
+        // Checks whether there is an ative reward vesting
+        if (block.timestamp >= periodFinish) {
+            // There is no active reward vesting, create a new schedule!
+            // If there is any reward token left in the vault, add it together.
+            _reward = IERC20Upgradeable(rewardToken).balanceOf(address(this));
+            rewardRate = _reward.div(DURATION);
+            periodFinish = block.timestamp.add(DURATION);
+        } else {
+            // There is an active reward vesting schedule, does not change the schedule
+            // but increase the rate instead.
+            uint256 remaining = periodFinish.sub(block.timestamp);
+            rewardRate = rewardRate.add(_reward.div(remaining));
+        }
+        lastUpdateTime = block.timestamp;
+
+        emit RewardAdded(rewardToken, _reward, periodFinish);
     }
 }

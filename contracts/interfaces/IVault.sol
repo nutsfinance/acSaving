@@ -83,9 +83,26 @@ interface IVault {
     function withdraw(uint256 _shares) external;
 
     /**
-     * @dev Notifies the vault that a new reward is added.
+     * @dev Withdraws all balance and all rewards from the vault.
+     */
+    function exit() external;
+
+    /**
+     * @dev Claims all rewards from the vault.
+     */
+    function claimReward() external returns (uint256);
+
+    /**
+     * @dev Notifies the vault that a new reward is added. This function changes the reward vesting schedule.
      * The reward token is set in Controller.rewardToken().
      * @param _rewardAmount Amount of reward that is newly added to the vault.
      */
     function notifyRewardAmount(uint256 _rewardAmount) external;
+
+    /**
+     * @dev Adds rewards to the vault. This function DOES NOT change the reward vesting schedule.
+     * The reward token is set in Controller.rewardToken().
+     * @param _rewardAmount Amount of reward that is newly added to the vault.
+     */
+    function addReward(uint256 _rewardAmount) external;
 }
