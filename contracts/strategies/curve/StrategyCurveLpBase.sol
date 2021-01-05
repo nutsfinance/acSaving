@@ -115,6 +115,9 @@ abstract contract StrategyCurveLpBase is StrategyBase {
         return balanceOfWant().add(balanceOfPool());
     }
 
+    /**
+     * @dev Return the list of tokens that should not be salvaged.
+     */
     function _getProtectedTokens() internal virtual override view returns (address[] memory) {
         address[] memory protectedTokens = new address[](3);
         protectedTokens[0] = token();
