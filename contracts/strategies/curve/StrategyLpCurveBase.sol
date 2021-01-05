@@ -13,7 +13,7 @@ import "../../interfaces/curve/ICurveGauge.sol";
 /**
  * @dev Base strategy for Curve's LP token, e.g. renCrv, hbtcCrv, tbtcCrv.
  */
-abstract contract StrategyCurveLpBase is StrategyBase {
+abstract contract StrategyLpCurveBase is StrategyBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 

@@ -6,16 +6,16 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
-import "./StrategyCurveLpBase.sol";
-import "../../interfaces/IVault.sol";
-import "../../interfaces/curve/ICurveFi.sol";
-import "../../interfaces/curve/ICurveMinter.sol";
-import "../../interfaces/uniswap/IUniswapRouter.sol";
+import "../StrategyLpCurveBase.sol";
+import "../../../interfaces/IVault.sol";
+import "../../../interfaces/curve/ICurveFi.sol";
+import "../../../interfaces/curve/ICurveMinter.sol";
+import "../../../interfaces/uniswap/IUniswapRouter.sol";
 
 /**
  * @dev Earning strategy that accepts hbtcCRV, earns CRV and converts CRV back to hbtcCRV as yield.
  */
-contract StrategyCurveHbtcCrv is StrategyCurveLpBase {
+contract StrategyHbtcCrvCurve is StrategyLpCurveBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
@@ -23,7 +23,7 @@ contract StrategyCurveHbtcCrv is StrategyCurveLpBase {
     address public constant HBTCCRV_GAUGE = address(0x4c18E409Dc8619bFb6a1cB56D114C3f592E0aE79); // hbtcCrv gauge
     address public constant HBTC_SWAP = address(0x4CA9b3063Ec5866A4B82E437059D2C43d1be596F); // HBTC swap
 
-    constructor(address _vault) StrategyCurveLpBase(_vault, HBTCCRV_GAUGE, HBTC_SWAP) public {
+    constructor(address _vault) StrategyLpCurveBase(_vault, HBTCCRV_GAUGE, HBTC_SWAP) public {
     }
     
     /**

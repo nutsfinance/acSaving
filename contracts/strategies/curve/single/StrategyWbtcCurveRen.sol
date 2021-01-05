@@ -6,24 +6,24 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
-import "./StrategyCurveOneBase.sol";
-import "../../interfaces/IVault.sol";
-import "../../interfaces/curve/ICurveFi.sol";
+import "../StrategyCurveBase.sol";
+import "../../../interfaces/IVault.sol";
+import "../../../interfaces/curve/ICurveFi.sol";
 
 /**
- * @dev Strategy for WBTC on Curve.
+ * @dev Strategy for WBTC on Curve's Ren pool.
  * Important tokens:
  * - want: WBTC
  * - lp: renCrv
  * - lpVault: renCrvv
  */
-contract StrategyCurveWbtc is StrategyCurveOneBase {
+contract StrategyWbtcCurveRen is StrategyCurveBase {
     
     // Pool parameters
     address public constant RENCRV_VAULT = address(0x59aAbBC33311fD0961F17E684584c0A090034d5F); // renCrv vault
     address public constant REN_SWAP = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B); // REN swap
 
-    constructor(address _vault) StrategyCurveOneBase(_vault, RENCRV_VAULT, REN_SWAP) public {
+    constructor(address _vault) StrategyCurveBase(_vault, RENCRV_VAULT, REN_SWAP) public {
     }
 
     /**

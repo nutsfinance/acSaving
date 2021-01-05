@@ -19,7 +19,7 @@ import "../../interfaces/curve/ICurveGauge.sol";
  * - lp: The LP token when the want token is deposited into the target Curve swap, e.g. renCrv
  * - lpVault: The vault share token of lp vault, e.g. renCrvv
  */
-abstract contract StrategyCurveOneBase is StrategyBase {
+abstract contract StrategyCurveBase is StrategyBase {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
