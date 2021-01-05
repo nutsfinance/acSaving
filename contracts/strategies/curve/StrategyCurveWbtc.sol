@@ -44,7 +44,10 @@ abstract contract StrategyCurveWbtc is StrategyBase {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {
-            _depositOne(_want);
+            want.safeApprove(curve, 0);
+            want.safeApprove(curve, _want);
+            uint256 v = _want.mul(1e18).mul(_getLpRate()).div(ICurveFi(curve).get_virtual_price());
+            ICurveFi(curve).add_liquidity([0, _want], v.mul(PERCENT_MAX.sub(slippage)).div(PERCENT_MAX));
         }
 
         IERC20Upgradeable lp = IERC20Upgradeable(IVault(lpVault).token());
@@ -81,18 +84,6 @@ abstract contract StrategyCurveWbtc is StrategyBase {
      */
     function _getLpRate() internal view returns (uint256) {
         return uint256(10) ** (18 - ERC20Upgradeable(token()).decimals());
-    }
-
-    /**
-     * @dev Deposits the token into Curve.
-     */
-    function _depositOne(uint256 _want) internal {
-        IERC20Upgradeable want = IERC20Upgradeable(token());
-        want.safeApprove(curve, 0);
-        want.safeApprove(curve, _want);
-
-        uint256 v = _want.mul(1e18).mul(_getLpRate()).div(ICurveFi(curve).get_virtual_price());
-        ICurveFi(curve).add_liquidity([0, _want], v.mul(PERCENT_MAX.sub(slippage)).div(PERCENT_MAX));
     }
 
     /**
