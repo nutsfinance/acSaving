@@ -83,7 +83,7 @@ contract StrategyCurveObtcCrv is StrategyCurveLpBase {
         }
         uint256 _feeAmount = 0;
         if (performanceFee > 0) {
-            _feeAmount = _want.mul(performanceFee).div(FEE_MAX);
+            _feeAmount = _want.mul(performanceFee).div(PERCENT_MAX);
             want.safeTransfer(IController(controller()).treasury(), _feeAmount);
         }
         deposit();

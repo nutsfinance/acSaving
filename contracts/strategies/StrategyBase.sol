@@ -23,7 +23,7 @@ abstract contract StrategyBase is IStrategy {
     address public override vault;
     uint256 public override performanceFee;
     uint256 public override withdrawalFee;
-    uint256 public constant FEE_MAX = 10000;    // 0.01%
+    uint256 public constant PERCENT_MAX = 10000;    // 0.01%
 
     constructor(address _vault) internal {
         require(_vault != address(0x0), "vault not set");
@@ -76,7 +76,7 @@ abstract contract StrategyBase is IStrategy {
      * @dev Updates the performance fee. Only governance can update the performance fee.
      */
     function setPerformanceFee(uint256 _performanceFee) public onlyGovernance {
-        require(_performanceFee <= FEE_MAX, "overflow");
+        require(_performanceFee <= PERCENT_MAX, "overflow");
         uint256 oldPerformanceFee = performanceFee;
         performanceFee = _performanceFee;
 
@@ -87,7 +87,7 @@ abstract contract StrategyBase is IStrategy {
      * @dev Updates the withdrawal fee. Only governance can update the withdrawal fee.
      */
     function setWithdrawalFee(uint256 _withdrawalFee) public onlyGovernance {
-        require(_withdrawalFee <= FEE_MAX, "overflow");
+        require(_withdrawalFee <= PERCENT_MAX, "overflow");
         uint256 oldWithdrawalFee = withdrawalFee;
         withdrawalFee = _withdrawalFee;
 

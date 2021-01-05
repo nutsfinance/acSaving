@@ -63,7 +63,7 @@ abstract contract StrategyCurveLpBase is StrategyBase {
             _amount = _amount.add(_balance);
         }
         if (withdrawalFee > 0) {
-            uint256 _feeAmount = _amount.mul(withdrawalFee).div(FEE_MAX);
+            uint256 _feeAmount = _amount.mul(withdrawalFee).div(PERCENT_MAX);
             want.safeTransfer(IController(controller()).treasury(), _feeAmount);
             _amount = _amount.sub(_feeAmount);
         }

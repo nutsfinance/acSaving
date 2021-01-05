@@ -40,7 +40,7 @@ abstract contract StrategyCurveWbtc is StrategyBase {
             want.safeApprove(curve, 0);
             want.safeApprove(curve, _want);
             uint256 v = _want.mul(1e30).div(ICurveFi(curve).get_virtual_price());
-            ICurveFi(curve).add_liquidity([0, _want], v.mul(FEE_MAX.sub(slippage)).div(FEE_MAX));
+            ICurveFi(curve).add_liquidity([0, _want], v.mul(PERCENT_MAX.sub(slippage)).div(PERCENT_MAX));
         }
 
         IERC20Upgradeable lp = IERC20Upgradeable(IVault(lpVault).token());
@@ -64,7 +64,7 @@ abstract contract StrategyCurveWbtc is StrategyBase {
             _amount = _amount.add(_balance);
         }
         if (withdrawalFee > 0) {
-            uint256 _feeAmount = _amount.mul(withdrawalFee).div(FEE_MAX);
+            uint256 _feeAmount = _amount.mul(withdrawalFee).div(PERCENT_MAX);
             want.safeTransfer(IController(controller()).treasury(), _feeAmount);
             _amount = _amount.sub(_feeAmount);
         }
@@ -89,7 +89,7 @@ abstract contract StrategyCurveWbtc is StrategyBase {
         IERC20Upgradeable lp = IERC20Upgradeable(IVault(lpVault).token());
         lp.safeApprove(curve, 0);
         lp.safeApprove(curve, _lp);
-        ICurveFi(curve).remove_liquidity_one_coin(_lp, 1, _lp.mul(FEE_MAX.sub(slippage)).div(FEE_MAX).div(1e12));
+        ICurveFi(curve).remove_liquidity_one_coin(_lp, 1, _lp.mul(PERCENT_MAX.sub(slippage)).div(PERCENT_MAX).div(1e12));
         uint256 _after = want.balanceOf(address(this));
 
         return _after.sub(_before);
@@ -138,7 +138,7 @@ abstract contract StrategyCurveWbtc is StrategyBase {
     }
 
     function setSlippage(uint256 _slippage) public onlyStrategist {
-        require(_slippage <= FEE_MAX, "overflow");
+        require(_slippage <= PERCENT_MAX, "overflow");
         uint256 oldSlippage = slippage;
         slippage = _slippage;
 
