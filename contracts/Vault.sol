@@ -34,7 +34,7 @@ contract Vault is VaultBase {
 
     uint256[50] private __gap;
 
-    event RewardAdded(address indexed rewardToken, uint256 rewardAmount, uint256 rewardFinish);
+    event RewardAdded(address indexed rewardToken, uint256 rewardAmount);
     event RewardClaimed(address indexed rewardToken, address indexed user, uint256 rewardAmount);
 
     modifier updateReward(address _account) {
@@ -114,17 +114,14 @@ contract Vault is VaultBase {
     function notifyRewardAmount(uint256 _reward) public virtual override updateReward(address(0)) {
         require(msg.sender == controller, "not controller");
 
-        if (block.timestamp >= periodFinish) {
-            rewardRate = _reward.div(DURATION);
-        } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = _reward.add(leftover).div(DURATION);
-        }
+        address rewardToken = IController(controller).rewardToken();
+        uint256 balance = IERC20Upgradeable(rewardToken).balanceOf(address(this));
+        rewardRate = balance.div(DURATION);
+
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
 
-        emit RewardAdded(IController(controller).rewardToken(), _reward, periodFinish);
+        emit RewardAdded(rewardToken, _reward);
     }
 
     /**
@@ -133,25 +130,17 @@ contract Vault is VaultBase {
      * @param _reward Amount of reward that is newly added to the vault.
      */
     function addReward(uint256 _reward) public virtual override updateReward(address(0)) {
+        require(_reward > 0, "zero amount");
+
         // We don't perform caller check here, which means anyone can donate rewards to the vault.
         address rewardToken = IController(controller).rewardToken();
         IERC20Upgradeable(rewardToken).safeTransferFrom(msg.sender, address(this), _reward);
 
-        // Checks whether there is an ative reward vesting
-        if (block.timestamp >= periodFinish) {
-            // There is no active reward vesting, create a new schedule!
-            // If there is any reward token left in the vault, add it together.
-            _reward = IERC20Upgradeable(rewardToken).balanceOf(address(this));
-            rewardRate = _reward.div(DURATION);
-            periodFinish = block.timestamp.add(DURATION);
-        } else {
-            // There is an active reward vesting schedule, does not change the schedule
-            // but increase the rate instead.
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            rewardRate = rewardRate.add(_reward.div(remaining));
+        uint256 _totalSupply = totalSupply();
+        if (_totalSupply != 0) {
+            rewardPerTokenStored = rewardPerTokenStored.add(_reward.mul(1e18).div(_totalSupply));
         }
-        lastUpdateTime = block.timestamp;
 
-        emit RewardAdded(rewardToken, _reward, periodFinish);
+        emit RewardAdded(rewardToken, _reward);
     }
 }
