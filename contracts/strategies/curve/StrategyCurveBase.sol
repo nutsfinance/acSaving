@@ -136,8 +136,11 @@ abstract contract StrategyCurveBase is StrategyBase {
         // Withdraws want token from the withdrawn lp tokens.
         uint256 _lp = IERC20Upgradeable(IVault(lpVault).token()).balanceOf(address(this));
         if (_lp > 0) {
-            balance = _withdrawOne(_lp);
+            _withdrawOne(_lp);
         }
+        IERC20Upgradeable want = IERC20Upgradeable(token());
+        balance = want.balanceOf(address(this));
+        want.safeTransfer(vault, balance);
 
         // Distributes the reward token to the vault.
         IERC20Upgradeable rewardToken = IERC20Upgradeable(IController(controller()).rewardToken());
