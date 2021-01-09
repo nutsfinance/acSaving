@@ -134,7 +134,7 @@ contract Vault is VaultBase {
      * Therefore, it allows others to donate to the vault!
      * @param _reward Amount of reward that is newly added to the vault.
      */
-    function addReward(uint256 _reward) public virtual override updateReward(address(0)) {
+    function addRewards(uint256 _reward) public virtual override updateReward(address(0)) {
         require(_reward > 0, "zero amount");
 
         // We don't perform caller check here, which means anyone can donate rewards to the vault.

@@ -275,4 +275,35 @@ contract("Vault", async ([owner, treasury, user1, user2, user3, user4]) => {
         assertAlmostEqual(await vault.rewardPerToken(), web3.utils.toWei('144000'));
         assertAlmostEqual(await vault.earned(user1), web3.utils.toWei('144000'));
     });
+
+    it("should allow anyone to donate rewards to vault", async () => {
+        // 72000 reward tokens per week
+        await rewardToken.mint(owner, web3.utils.toWei('72000'));
+        await rewardToken.approve(controller.address, web3.utils.toWei('72000'));
+        await controller.addRewards(0, web3.utils.toWei('72000'));
+
+        await vault.deposit(web3.utils.toWei('1'), { from: user1 });
+        await vault.deposit(web3.utils.toWei('3'), { from: user2 });
+
+        await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
+
+        assertAlmostEqual(await vault.rewardPerToken(), web3.utils.toWei('18000'));
+        assertAlmostEqual(await vault.earned(user1), web3.utils.toWei('18000'));
+        assertAlmostEqual(await vault.earned(user2), web3.utils.toWei('54000'));
+
+        await rewardToken.mint(user4, web3.utils.toWei('400'));
+        await rewardToken.approve(vault.address, web3.utils.toWei('400'), {from: user4});
+        await vault.addRewards(web3.utils.toWei('400'), {from: user4});
+        assertAlmostEqual(await vault.rewardPerToken(), web3.utils.toWei('18100'));
+        assertAlmostEqual(await vault.earned(user1), web3.utils.toWei('18100'));
+        assertAlmostEqual(await vault.earned(user2), web3.utils.toWei('54300'));
+    });
+
+    it("should forward reward donation to treasury if the vault is empty", async () => {
+        assertAlmostEqual(await rewardToken.balanceOf(treasury), '0');
+        await rewardToken.mint(user4, web3.utils.toWei('400'));
+        await rewardToken.approve(vault.address, web3.utils.toWei('400'), {from: user4});
+        await vault.addRewards(web3.utils.toWei('400'), {from: user4});
+        assertAlmostEqual(await rewardToken.balanceOf(treasury), web3.utils.toWei('400'));
+    });
 });

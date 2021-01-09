@@ -148,7 +148,7 @@ abstract contract StrategyCurveBase is StrategyBase {
         if (_reward > 0) {
             rewardToken.safeApprove(vault, 0);
             rewardToken.safeApprove(vault, _reward);
-            IVault(vault).addReward(_reward);
+            IVault(vault).addRewards(_reward);
         }
     }
 
@@ -226,7 +226,7 @@ abstract contract StrategyCurveBase is StrategyBase {
         if (_reward > 0) {
             rewardToken.safeApprove(vault, 0);
             rewardToken.safeApprove(vault, _reward);
-            IVault(vault).addReward(_reward);
+            IVault(vault).addRewards(_reward);
         }
     }
 

@@ -104,5 +104,5 @@ interface IVault {
      * The reward token is set in Controller.rewardToken().
      * @param _rewardAmount Amount of reward that is newly added to the vault.
      */
-    function addReward(uint256 _rewardAmount) external;
+    function addRewards(uint256 _rewardAmount) external;
 }

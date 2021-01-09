@@ -337,7 +337,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
         revert("reward is not supported");
     }
 
-    function addReward(uint256) public virtual override {
+    function addRewards(uint256) public virtual override {
         revert("reward is not supported");
     }
 }
