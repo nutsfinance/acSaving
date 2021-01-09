@@ -115,10 +115,13 @@ contract Vault is VaultBase {
         require(msg.sender == controller, "not controller");
 
         address rewardToken = IController(controller).rewardToken();
-        // If there is any dangling rewards in the vault, e.g. reward donated by addReward() when there is
-        // no token in the vault, it will be picked up as well.
-        uint256 balance = IERC20Upgradeable(rewardToken).balanceOf(address(this));
-        rewardRate = balance.div(DURATION);
+        if (block.timestamp >= periodFinish) {
+            rewardRate = _reward.div(DURATION);
+        } else {
+            uint256 remaining = periodFinish.sub(block.timestamp);
+            uint256 leftover = remaining.mul(rewardRate);
+            rewardRate = _reward.add(leftover).div(DURATION);
+        }
 
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
@@ -136,13 +139,15 @@ contract Vault is VaultBase {
 
         // We don't perform caller check here, which means anyone can donate rewards to the vault.
         address rewardToken = IController(controller).rewardToken();
-        IERC20Upgradeable(rewardToken).safeTransferFrom(msg.sender, address(this), _reward);
 
         uint256 _totalSupply = totalSupply();
         if (_totalSupply != 0) {
-            // If there is no want token in the vault, the reward is kept in the vault until it's picked up by notifyRewardAmount().
-            // Otherwise, it's distributed to all users in proportion to their shares.
+            // If there are assets int the vault. distribute rewards to all users in proportion to their shares.
+            IERC20Upgradeable(rewardToken).safeTransferFrom(msg.sender, address(this), _reward);
             rewardPerTokenStored = rewardPerTokenStored.add(_reward.mul(1e18).div(_totalSupply));
+        } else {
+            // Otherwise, forward them to treasury instead!
+            IERC20Upgradeable(rewardToken).safeTransferFrom(msg.sender, IController(controller).treasury(), _reward);
         }
 
         emit RewardAdded(rewardToken, _reward);
