@@ -110,7 +110,7 @@ abstract contract StrategyCurveBase is StrategyBase {
      * @dev Withdraws one token from the Curve swap.
      * @param _lp Amount of LP token to withdraw.
      */
-    function _withdrawOne(uint256 _lp) internal returns (uint256) {
+    function _withdrawOne(uint256 _lp) internal virtual returns (uint256) {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _before = want.balanceOf(address(this));
 
