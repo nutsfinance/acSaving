@@ -105,4 +105,37 @@ interface IVault {
      * @param _rewardAmount Amount of reward that is newly added to the vault.
      */
     function addRewards(uint256 _rewardAmount) external;
+
+    /**
+     * @dev Updates the strategist address. Only governance or strategist can update strategist.
+     * Each vault has its own strategist to perform daily permissioned opertions.
+     * Vault and its strategies managed share the same strategist.
+     */
+    function setStrategist(address _strategist) external;
+
+    /**
+     * @dev Updates the emergency mode. Only governance or strategist can update emergency mode.
+     */
+    function setEmergencyMode(bool _active) external;
+
+    /**
+     * @dev Updates the active strategy of the vault. Only governance or strategist can update the active strategy.
+     * Only approved strategy can be selected as active strategy.
+     * No new strategy is accepted in emergency mode.
+     */
+    function setActiveStrategy(address _strategy) external;
+
+    /**
+     * @dev Starts earning and deposits all current balance into strategy.
+     * Only strategist or governance can call this function.
+     * This function will throw if the vault is in emergency mode.
+     */
+    function earn() external;
+
+    /**
+     * @dev Harvest yield from the strategy if set.
+     * Only strategist or governance can call this function.
+     * This function will throw if the vault is in emergency mode.
+     */
+    function harvest() external;
 }

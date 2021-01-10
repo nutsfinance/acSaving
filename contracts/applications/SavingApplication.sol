@@ -10,12 +10,13 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol
 import "../interfaces/IController.sol";
 import "../interfaces/IAccount.sol";
 import "../interfaces/IVault.sol";
+import "../interfaces/ISavingApplication.sol";
 
 /**
  * @notice Application to save assets from account to vaults to
  * earn yield and rewards.
  */
-contract SavingApplication is Initializable {
+contract SavingApplication is Initializable, ISavingApplication {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
@@ -33,8 +34,8 @@ contract SavingApplication is Initializable {
     mapping(address => mapping(address => bool)) public autoSaving;
     // Token ==> Auto saving threshold
     mapping(address => uint256) public autoSavingThreshold;
-    address public controller;
-    address public governance;
+    address public override controller;
+    address public override governance;
     address public strategist;
 
     uint256[50] private __gap;
@@ -71,11 +72,11 @@ contract SavingApplication is Initializable {
     }
 
     /**
-     * @dev Updates the strategist address. Only governance can update strategist.
+     * @dev Updates the strategist address. Only governance and strategist can update strategist.
      * Each vault has its own strategist to perform daily permissioned opertions.
      * Vault and its strategies managed share the same strategist.
      */
-    function setStrategist(address _strategist) public onlyGovernance {
+    function setStrategist(address _strategist) public override onlyStrategist {
         address oldStrategist = strategist;
         strategist = _strategist;
         emit StrategistUpdated(oldStrategist, _strategist);
@@ -242,7 +243,7 @@ contract SavingApplication is Initializable {
      * @param _accounts Accounts to deposit token from.
      * @param _vaultId ID of the target vault.
      */
-    function depositForAccounts(address[] memory _accounts, uint256 _vaultId) public onlyStrategist {
+    function depositForAccounts(address[] memory _accounts, uint256 _vaultId) public override onlyStrategist {
         IVault vault = IVault(IController(controller).vaults(_vaultId));
         require(address(vault) != address(0x0), "no vault");
         address token = vault.token();

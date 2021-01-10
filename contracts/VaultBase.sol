@@ -130,7 +130,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * Each vault has its own strategist to perform daily permissioned opertions.
      * Vault and its strategies managed share the same strategist.
      */
-    function setStrategist(address _strategist) public onlyStrategist {
+    function setStrategist(address _strategist) public override onlyStrategist {
         address oldStrategist = strategist;
         strategist = _strategist;
         emit StrategistUpdated(oldStrategist, _strategist);
@@ -139,7 +139,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
     /**
      * @dev Updates the emergency mode. Only governance or strategist can update emergency mode.
      */
-    function setEmergencyMode(bool _active) public onlyStrategist {
+    function setEmergencyMode(bool _active) public override onlyStrategist {
         emergencyMode = _active;
         // If emergency mode is active and there is an active strategy,
         // withdraws all assets from strategy back to the vault and resets active strategy.
@@ -171,7 +171,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * Only approved strategy can be selected as active strategy.
      * No new strategy is accepted in emergency mode.
      */
-    function setActiveStrategy(address _strategy) public onlyStrategist notEmergencyMode {
+    function setActiveStrategy(address _strategy) public override onlyStrategist notEmergencyMode {
         // The new active strategy can be zero address, which means withdrawing all assets back to the vault.
         // Otherwise, the new strategy must be approved by governance before hand.
         require(_strategy == address(0x0) || approvedStrategies[_strategy], "strategy not approved");
@@ -194,7 +194,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * Only strategist or governance can call this function.
      * This function will throw if the vault is in emergency mode.
      */
-    function earn() public onlyStrategist notEmergencyMode {
+    function earn() public override onlyStrategist notEmergencyMode {
         if (activeStrategy == address(0x0)) return;
         IERC20Upgradeable want = IERC20Upgradeable(token);
         uint256 _bal = want.balanceOf(address(this));
@@ -209,7 +209,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * Only strategist or governance can call this function.
      * This function will throw if the vault is in emergency mode.
      */
-    function harvest() public onlyStrategist notEmergencyMode {
+    function harvest() public override onlyStrategist notEmergencyMode {
         require(activeStrategy != address(0x0), "no strategy");
         IStrategy(activeStrategy).harvest();
     }
