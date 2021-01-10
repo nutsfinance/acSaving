@@ -40,7 +40,7 @@ abstract contract StrategyCurveBase is StrategyBase {
     /**
      * @dev Invests the free token balance in the strategy.
      */
-    function deposit() public override {
+    function deposit() public virtual override {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {
@@ -246,12 +246,12 @@ abstract contract StrategyCurveBase is StrategyBase {
      * @param _want Amount of want token to deposit.
      * @param _minAmount Minimum LP token to receive.
      */
-    function _depositToCurve(uint256 _want, uint256 _minAmount) internal virtual;
+    function _depositToCurve(uint256 _want, uint256 _minAmount) internal virtual {}
 
     /**
      * @dev Withdraws the want token from Curve by burning lp token.
      * @param _lp Amount of LP token to burn.
      * @param _minAmount Minimum want token to receive.
      */
-    function _withdrawFromCurve(uint256 _lp, uint256 _minAmount) internal virtual;
+    function _withdrawFromCurve(uint256 _lp, uint256 _minAmount) internal virtual {}
 }

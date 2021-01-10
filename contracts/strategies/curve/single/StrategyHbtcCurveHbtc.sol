@@ -27,12 +27,25 @@ contract StrategyHbtcCurveHbtc is StrategyCurveBase {
     }
 
     /**
-     * @dev Deposits the want token into Curve in exchange for lp token.
-     * @param _want Amount of want token to deposit.
-     * @param _minAmount Minimum LP token to receive.
+     * @dev Invests the free token balance in the strategy.
+     * Special handling for HBTC since HBTC does not allow setting allowance to zero!
      */
-    function _depositToCurve(uint256 _want, uint256 _minAmount) internal override {
-        ICurveFi(curve).add_liquidity([_want, 0], _minAmount);
+    function deposit() public override {
+        IERC20Upgradeable want = IERC20Upgradeable(token());
+        uint256 _want = want.balanceOf(address(this));
+        if (_want > 0) {
+            want.safeApprove(curve, _want);
+            uint256 v = _want.mul(1e18).mul(_getLpRate()).div(ICurveFi(curve).get_virtual_price());
+            ICurveFi(curve).add_liquidity([_want, 0], v.mul(PERCENT_MAX.sub(slippage)).div(PERCENT_MAX));
+        }
+
+        IERC20Upgradeable lp = IERC20Upgradeable(IVault(lpVault).token());
+        uint256 _lp = lp.balanceOf(address(this));
+        if (_lp > 0) {
+            lp.safeApprove(lpVault, 0);
+            lp.safeApprove(lpVault, _lp);
+            IVault(lpVault).deposit(_lp);
+        }
     }
 
     /**

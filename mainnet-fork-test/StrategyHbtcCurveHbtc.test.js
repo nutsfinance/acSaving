@@ -1,14 +1,21 @@
-const { expectRevert } = require('@openzeppelin/test-helpers');
+const { time } = require('@openzeppelin/test-helpers');
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 const assert = require('assert');
 const StrategyHbtcCurveHbtc = artifacts.require("StrategyHbtcCurveHbtc");
 const ERC20 = artifacts.require("ERC20Upgradeable");
 const Vault = artifacts.require("Vault");
 const Controller = artifacts.require("Controller");
-const ACoconut = artifacts.require("ACoconut");
+const MockToken = artifacts.require("MockToken");
 
 const HBTC = '0x0316eb71485b0ab14103307bf65a021042c6d380';
 const HBTC_HOLDER = '0x24d48513eac38449ec7c310a79584f87785f856f';
+
+async function timeIncreaseTo (seconds) {
+    const delay = 10 - new Date().getMilliseconds();
+    await new Promise(resolve => setTimeout(resolve, delay));
+    await time.increaseTo(seconds);
+}
+
 
 /**
  * Start Mainnet fork node:
@@ -20,24 +27,33 @@ const HBTC_HOLDER = '0x24d48513eac38449ec7c310a79584f87785f856f';
 contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
     let hbtc;
     let hbtcVault;
+    let strategy;
+    let startTime;
 
     beforeEach(async () => {
-        const aCoconut = await ACoconut.deployed();
         await web3.eth.sendTransaction({from: owner, to: HBTC_HOLDER, value: web3.utils.toWei('1')});
+        const token = await MockToken.new();
+        await token.initialize("ACoconut", "AC", 18);
         const controller = await Controller.new();
-        await controller.initialize(aCoconut.address, treasury);
+        await controller.initialize(token.address, treasury);
 
         hbtc = await ERC20.at(HBTC);
         hbtcVault = await Vault.new();
         await hbtcVault.initialize(HBTC, controller.address, "", "");
 
-        const strategy = await StrategyHbtcCurveHbtc.new(hbtcVault.address);
+        strategy = await StrategyHbtcCurveHbtc.new(hbtcVault.address);
         await hbtcVault.setStrategy(strategy.address, true);
         await hbtcVault.setActiveStrategy(strategy.address);
+
+        startTime = (await time.latest()).addn(10);
     });
     it("should harvest HBTC", async () => {
-        await hbtc.approve(hbtcVault.address, web3.utils.toWei('160'), {from: HBTC_HOLDER});
-        await hbtcVault.deposit(web3.utils.toWei('160'), {from: HBTC_HOLDER});
+        await hbtc.approve(hbtcVault.address, web3.utils.toWei('16'), {from: HBTC_HOLDER});
+        await hbtcVault.deposit(web3.utils.toWei('16'), {from: HBTC_HOLDER});
+
         await hbtcVault.earn();
+
+        await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
+        await hbtcVault.harvest();
     });
 });
