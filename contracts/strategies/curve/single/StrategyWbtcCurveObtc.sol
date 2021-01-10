@@ -29,18 +29,6 @@ contract StrategyWbtcCurveObtc is StrategyCurveBase {
     }
 
     /**
-     * @dev Deposits the want token into Curve in exchange for lp token.
-     * @param _want Amount of want token to deposit.
-     * @param _minAmount Minimum LP token to receive.
-     */
-    function _depositToCurve(uint256 _want, uint256 _minAmount) internal override {
-        IERC20Upgradeable want = IERC20Upgradeable(token());
-        want.safeApprove(OBTC_DEPOSIT, 0);
-        want.safeApprove(OBTC_DEPOSIT, _want);
-        ICurveFi(OBTC_DEPOSIT).add_liquidity([0, 0, _want, 0], _minAmount);
-    }
-
-    /**
      * @dev Invests the free token balance in the strategy.
      * Special handling for WBTC's oBTC pool strategy since WBTC should be deposited via oBTC deposit!
      */
