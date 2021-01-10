@@ -22,7 +22,10 @@ contract StrategyObtcCrvCurve is StrategyLpCurveBase {
 
     // Pool parameters
     address public constant OBTCCRV_GAUGE = address(0x11137B10C210b579405c21A07489e28F3c040AB1); // obtcCrv gauge
-    address public constant OBTC_SWAP = address(0xd5BCf53e2C81e1991570f33Fa881c49EEa570C8D); // oBTC swap
+    // Note the difference between StrategyObtcCurveObtc and StrategyObtcCrvCurve/StrategyWbtcCurveObtc
+    // 1. In StrategyObtcCurveObtc, oBTC is deposited, so we can use oBTC swap directly
+    // 2. In StrategyObtcCrvCurve/StrategyWbtcCurveObtc, WBTC is deposited, so we use oBTC deposit instead.
+    address public constant OBTC_SWAP = address(0xd5BCf53e2C81e1991570f33Fa881c49EEa570C8D); // oBTC deposit
     
     address public constant bor = address(0x3c9d6c1C73b31c837832c72E04D3152f051fc1A9); 
 

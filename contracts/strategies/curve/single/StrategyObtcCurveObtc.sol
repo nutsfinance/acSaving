@@ -21,6 +21,9 @@ contract StrategyObtcCurveObtc is StrategyCurveBase {
     
     // Pool parameters
     address public constant OBTCCRV_VAULT = address(0xa73b91094304cd7bd1e67a839f63e287B29c0f65); // obtcCrv vault
+    // Note the difference between StrategyObtcCurveObtc and StrategyObtcCrvCurve/StrategyWbtcCurveObtc
+    // 1. In StrategyObtcCurveObtc, oBTC is deposited, so we can use oBTC swap directly
+    // 2. In StrategyObtcCrvCurve/StrategyWbtcCurveObtc, WBTC is deposited, so we use oBTC deposit instead.
     address public constant OBTC_SWAP = address(0xd81dA8D904b52208541Bade1bD6595D8a251F8dd); // OBTC swap
 
     constructor(address _vault) StrategyCurveBase(_vault, OBTCCRV_VAULT, OBTC_SWAP) public {
@@ -32,7 +35,7 @@ contract StrategyObtcCurveObtc is StrategyCurveBase {
      * @param _minAmount Minimum LP token to receive.
      */
     function _depositToCurve(uint256 _want, uint256 _minAmount) internal override {
-        ICurveFi(curve).add_liquidity([_want, 0, 0, 0], _minAmount);
+        ICurveFi(curve).add_liquidity([_want, 0], _minAmount);
     }
 
     /**
