@@ -10,6 +10,13 @@ const ACoconut = artifacts.require("ACoconut");
 const HBTC = '0x0316eb71485b0ab14103307bf65a021042c6d380';
 const HBTC_HOLDER = '0x24d48513eac38449ec7c310a79584f87785f856f';
 
+/**
+ * Start Mainnet fork node:
+ * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u 0x24d48513eac38449ec7c310a79584f87785f856f
+ * 
+ * Run test:
+ * truffle test mainnet-fork-test/StrategyHbtcCurveHbtc.test.js
+ */
 contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
     let hbtc;
     let hbtcVault;

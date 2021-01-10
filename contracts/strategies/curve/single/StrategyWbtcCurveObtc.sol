@@ -18,7 +18,8 @@ import "../../../interfaces/curve/ICurveFi.sol";
  * - lpVault: obtcCrvv
  */
 contract StrategyWbtcCurveObtc is StrategyCurveBase {
-    
+    using SafeERC20Upgradeable for IERC20Upgradeable;
+
     // Pool parameters
     address public constant OBTCCRV_VAULT = address(0xa73b91094304cd7bd1e67a839f63e287B29c0f65); // obtcCrv vault
     address public constant OBTC_SWAP = address(0xd81dA8D904b52208541Bade1bD6595D8a251F8dd); // OBTC swap
@@ -33,6 +34,9 @@ contract StrategyWbtcCurveObtc is StrategyCurveBase {
      * @param _minAmount Minimum LP token to receive.
      */
     function _depositToCurve(uint256 _want, uint256 _minAmount) internal override {
+        IERC20Upgradeable want = IERC20Upgradeable(token());
+        want.safeApprove(OBTC_DEPOSIT, 0);
+        want.safeApprove(OBTC_DEPOSIT, _want);
         ICurveFi(OBTC_DEPOSIT).add_liquidity([0, 0, _want, 0], _minAmount);
     }
 
@@ -42,6 +46,9 @@ contract StrategyWbtcCurveObtc is StrategyCurveBase {
      * @param _minAmount Minimum want token to receive.
      */
     function _withdrawFromCurve(uint256 _lp, uint256 _minAmount) internal override {
+        IERC20Upgradeable lp = IERC20Upgradeable(IVault(lpVault).token());
+        lp.safeApprove(OBTC_DEPOSIT, 0);
+        lp.safeApprove(OBTC_DEPOSIT, _lp);
         ICurveFi(OBTC_DEPOSIT).remove_liquidity_one_coin(_lp, 2, _minAmount);
     }
 }

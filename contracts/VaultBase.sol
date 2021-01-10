@@ -229,19 +229,19 @@ contract VaultBase is ERC20Upgradeable, IVault {
         }
 
         uint256 _pool = balance();
-        // uint256 _before = want.balanceOf(address(this));
-        // want.safeTransferFrom(msg.sender, address(this), _amount);
-        // uint256 _after = want.balanceOf(address(this));
-        // _amount = _after.sub(_before); // Additional check for deflationary tokens
-        // uint256 shares = 0;
-        // if (totalSupply() == 0) {
-        //     shares = _amount;
-        // } else {
-        //     shares = (_amount.mul(totalSupply())).div(_pool);
-        // }
-        // _mint(msg.sender, shares);
+        uint256 _before = want.balanceOf(address(this));
+        want.safeTransferFrom(msg.sender, address(this), _amount);
+        uint256 _after = want.balanceOf(address(this));
+        _amount = _after.sub(_before); // Additional check for deflationary tokens
+        uint256 shares = 0;
+        if (totalSupply() == 0) {
+            shares = _amount;
+        } else {
+            shares = (_amount.mul(totalSupply())).div(_pool);
+        }
+        _mint(msg.sender, shares);
 
-        // emit Deposited(msg.sender, address(want), _amount, shares);
+        emit Deposited(msg.sender, address(want), _amount, shares);
     }
 
     /**
