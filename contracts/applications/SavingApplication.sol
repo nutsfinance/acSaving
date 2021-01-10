@@ -201,12 +201,28 @@ contract SavingApplication is Initializable {
      * @param _vaultId ID of the vault to claim rewards.
      */
     function claimRewards(address _account, uint256 _vaultId) public {
-        IVault vault = IVault(IController(controller).vaults(_vaultId));
-        require(address(vault) != address(0x0), "no vault");
+        address vault = IController(controller).vaults(_vaultId);
+        require(vault != address(0x0), "no vault");
         IAccount account = IAccount(_account);
         _validateAccount(account);
 
-        _claimAllRewards(_account, _vaultId, address(vault));
+        _claimAllRewards(_account, _vaultId, vault);
+    }
+
+    /**
+     * @dev Claims rewards from RewardedVault.
+     * @param _account The account address used to claim rewards.
+     * @param _vaultIds IDs of the vault to claim rewards.
+     */
+    function claimRewardsFromVaults(address _account, uint256[] memory _vaultIds) public {        
+        IAccount account = IAccount(_account);
+        _validateAccount(account);
+
+        for (uint256 i = 0; i < _vaultIds.length; i++) {
+            address vault = IController(controller).vaults(_vaultIds[i]);
+            require(vault != address(0x0), "no vault");
+            _claimAllRewards(_account, _vaultIds[i], vault);
+        }
     }
 
     /**
