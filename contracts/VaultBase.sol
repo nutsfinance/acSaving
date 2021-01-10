@@ -198,7 +198,9 @@ contract VaultBase is ERC20Upgradeable, IVault {
         if (activeStrategy == address(0x0)) return;
         IERC20Upgradeable want = IERC20Upgradeable(token);
         uint256 _bal = want.balanceOf(address(this));
-        want.safeTransfer(activeStrategy, _bal);
+        if (_bal > 0) {
+            want.safeTransfer(activeStrategy, _bal);
+        }
         IStrategy(activeStrategy).deposit();
     }
 
