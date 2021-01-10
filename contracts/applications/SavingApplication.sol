@@ -138,10 +138,9 @@ contract SavingApplication is Initializable {
         IAccount account = IAccount(_account);
         _validateAccount(account);
         address token = vault.token();
-        account.approveToken(token, address(vault), _amount);
 
-        bytes memory methodData = abi.encodeWithSignature("deposit(uint256)", _amount);
-        account.invoke(address(vault), 0, methodData);
+        account.invoke(token, 0, abi.encodeWithSignature("approve(address,uint256)", address(vault), _amount));
+        account.invoke(address(vault), 0, abi.encodeWithSignature("deposit(uint256)", _amount));
 
         emit Deposited(_account, _vaultId, token, _amount);
 
