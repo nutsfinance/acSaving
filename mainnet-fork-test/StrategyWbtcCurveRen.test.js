@@ -1,14 +1,14 @@
 const { expectRevert, time } = require('@openzeppelin/test-helpers');
 const { web3 } = require('@openzeppelin/test-helpers/src/setup');
 const assert = require('assert');
-const StrategyRenBtcCurveRen = artifacts.require("StrategyRenBtcCurveRen");
+const StrategyWbtcCurveRen = artifacts.require("StrategyWbtcCurveRen");
 const ERC20 = artifacts.require("ERC20Upgradeable");
 const Vault = artifacts.require("Vault");
 const Controller = artifacts.require("Controller");
 const MockToken = artifacts.require("MockToken");
 
-const RENBTC = '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D';
-const RENBTC_HOLDER = '0x53463cd0b074E5FDafc55DcE7B1C82ADF1a43B2E';
+const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
+const WBTC_HOLDER = '0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2';
 
 async function timeIncreaseTo (seconds) {
     const delay = 10 - new Date().getMilliseconds();
@@ -18,43 +18,43 @@ async function timeIncreaseTo (seconds) {
 
 /**
  * Start Mainnet fork node:
- * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u 0x53463cd0b074E5FDafc55DcE7B1C82ADF1a43B2E
+ * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u 0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2
  * 
  * Run test:
- * truffle test mainnet-fork-test/StrategyRenbtcCurveRen.test.js
+ * truffle test mainnet-fork-test/StrategyWbtcCurveRen.test.js
  */
-contract("StrategyRenBtcCurveRen", async ([owner, user, user2, treasury]) => {
-    let renBtc;
-    let renBtcVault;
+contract("StrategyWbtcCurveRen", async ([owner, user, user2, treasury]) => {
+    let wbtc;
+    let wbtcVault;
     let strategy;
     let startTime;
 
     beforeEach(async () => {
-        await web3.eth.sendTransaction({from: owner, to: RENBTC_HOLDER, value: web3.utils.toWei('1')});
+        await web3.eth.sendTransaction({from: owner, to: WBTC_HOLDER, value: web3.utils.toWei('1')});
         const token = await MockToken.new();
         await token.initialize("ACoconut", "AC", 18);
         const controller = await Controller.new();
         await controller.initialize(token.address, treasury);
 
-        renBtc = await ERC20.at(RENBTC);
-        renBtcVault = await Vault.new();
-        await renBtcVault.initialize(RENBTC, controller.address, "", "");
+        wbtc = await ERC20.at(WBTC);
+        wbtcVault = await Vault.new();
+        await wbtcVault.initialize(WBTC, controller.address, "", "");
 
-        strategy = await StrategyRenBtcCurveRen.new(renBtcVault.address);
-        await renBtcVault.setStrategy(strategy.address, true);
-        await renBtcVault.setActiveStrategy(strategy.address);
+        strategy = await StrategyWbtcCurveRen.new(wbtcVault.address);
+        await wbtcVault.setStrategy(strategy.address, true);
+        await wbtcVault.setActiveStrategy(strategy.address);
 
         startTime = (await time.latest()).addn(10);
     });
-    it("should harvest renBTC", async () => {
-        await renBtc.approve(renBtcVault.address, '16000000000', {from: RENBTC_HOLDER});
-        await renBtcVault.deposit('16000000000', {from: RENBTC_HOLDER});
+    it("should harvest WBTC", async () => {
+        await wbtc.approve(wbtcVault.address, '1600000000', {from: WBTC_HOLDER});
+        await wbtcVault.deposit('1600000000', {from: WBTC_HOLDER});
 
-        console.log((await renBtc.decimals()).toString());
-        console.log((await renBtc.totalSupply()).toString());
-        await renBtcVault.earn();
+        console.log((await wbtc.decimals()).toString());
+        console.log((await wbtc.totalSupply()).toString());
+        await wbtcVault.earn();
 
         await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
-        await renBtcVault.harvest();
+        await wbtcVault.harvest();
     });
 });
