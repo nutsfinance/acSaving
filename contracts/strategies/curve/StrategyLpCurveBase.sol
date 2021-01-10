@@ -41,7 +41,7 @@ abstract contract StrategyLpCurveBase is StrategyBase {
     /**
      * @dev Deposits all renCRV into Curve liquidity gauge to earn CRV.
      */
-    function deposit() public override {
+    function deposit() public override authorized {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {

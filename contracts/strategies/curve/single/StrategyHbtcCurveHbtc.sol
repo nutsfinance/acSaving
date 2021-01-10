@@ -30,7 +30,7 @@ contract StrategyHbtcCurveHbtc is StrategyCurveBase {
      * @dev Invests the free token balance in the strategy.
      * Special handling for HBTC since HBTC does not allow setting allowance to zero!
      */
-    function deposit() public override {
+    function deposit() public override authorized {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {

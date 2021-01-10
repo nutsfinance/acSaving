@@ -44,7 +44,7 @@ contract StrategyWbtcCurveObtc is StrategyCurveBase {
      * @dev Invests the free token balance in the strategy.
      * Special handling for WBTC's oBTC pool strategy since WBTC should be deposited via oBTC deposit!
      */
-    function deposit() public virtual override {
+    function deposit() public virtual override authorized {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {

@@ -32,8 +32,7 @@ contract StrategyObtcCrvCurve is StrategyLpCurveBase {
     /**
      * @dev Claims CRV from Curve and convert it back to renCRV. Only vault, governance and strategist can harvest.
      */
-    function harvest() public override {
-        require(msg.sender == vault || msg.sender == governance() || msg.sender == strategist(), "not vault");
+    function harvest() public override authorized {
         uint256 sharePriceBefore = IVault(vault).getPricePerFullShare();
         // Step 1: Claims CRV from Curve
         ICurveMinter(mintr).mint(gauge);

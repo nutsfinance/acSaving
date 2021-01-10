@@ -29,8 +29,7 @@ contract StrategyHbtcCrvCurve is StrategyLpCurveBase {
     /**
      * @dev Claims CRV from Curve and convert it back to hbtcCRV. Only vault, governance and strategist can harvest.
      */
-    function harvest() public override {
-        require(msg.sender == vault || msg.sender == governance() || msg.sender == strategist(), "not vault");
+    function harvest() public override authorized {
         uint256 sharePriceBefore = IVault(vault).getPricePerFullShare();
         // Claims CRV from Curve
         ICurveMinter(mintr).mint(gauge);

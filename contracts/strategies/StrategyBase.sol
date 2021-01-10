@@ -30,6 +30,11 @@ abstract contract StrategyBase is IStrategy {
         vault = _vault;
     }
 
+    modifier authorized() {
+        require(msg.sender == vault || msg.sender == governance() || msg.sender == strategist(), "not authorized");
+        _;
+    }
+
     /**
      * @dev Returns the token that the vault pools to seek yield.
      * Should be the same as Vault.token().

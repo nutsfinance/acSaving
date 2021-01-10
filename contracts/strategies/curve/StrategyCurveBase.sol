@@ -40,7 +40,7 @@ abstract contract StrategyCurveBase is StrategyBase {
     /**
      * @dev Invests the free token balance in the strategy.
      */
-    function deposit() public virtual override {
+    function deposit() public virtual override authorized {
         IERC20Upgradeable want = IERC20Upgradeable(token());
         uint256 _want = want.balanceOf(address(this));
         if (_want > 0) {
@@ -215,7 +215,7 @@ abstract contract StrategyCurveBase is StrategyBase {
     /**
      * @dev Harvest reward from LP vault and distributes to the vault users.
      */
-    function harvest() public override {
+    function harvest() public override authorized {
         // The actual yield harvest is done together in the lp vault,
         // so yield harvest on want token is performed here.
         // Instead, we harvest the reward token from the LP vault and distributes
