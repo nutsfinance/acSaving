@@ -161,7 +161,7 @@ contract VaultBase is ERC20Upgradeable, IVault {
      * @param _strategy Strategy to approve or revoke.
      * @param _approved If true, the strategy can be selected as active strategy.
      */
-    function setStrategy(address _strategy, bool _approved) public onlyGovernance {
+    function approveStrategy(address _strategy, bool _approved) public onlyGovernance {
         approvedStrategies[_strategy] = _approved;
         emit StrategyUpdated(_strategy, _approved);
     }

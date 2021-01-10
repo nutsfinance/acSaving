@@ -30,17 +30,17 @@ contract("Vault", async ([owner, treasury, user, user2]) => {
     });
     it("should approve or revoke strategies", async () => {
         assert.strictEqual(await vault.approvedStrategies(strategy.address), false);
-        await expectRevert(vault.setStrategy(strategy.address, true, {from: user}), "not governance");
-        await vault.setStrategy(strategy.address, true);
+        await expectRevert(vault.approveStrategy(strategy.address, true, {from: user}), "not governance");
+        await vault.approveStrategy(strategy.address, true);
         assert.strictEqual(await vault.approvedStrategies(strategy.address), true);
-        await vault.setStrategy(strategy.address, false);
+        await vault.approveStrategy(strategy.address, false);
         assert.strictEqual(await vault.approvedStrategies(strategy.address), false);
     });
     it("should allow to set approved strategy as active strategy", async () => {
         assert.strictEqual(await vault.activeStrategy(), '0x0000000000000000000000000000000000000000');
         await expectRevert(vault.setActiveStrategy(strategy.address, {from: user}), "not strategist");
         await expectRevert(vault.setActiveStrategy(strategy.address), "strategy not approved");
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
         assert.strictEqual(await vault.activeStrategy(), strategy.address);
     });
@@ -52,7 +52,7 @@ contract("Vault", async ([owner, treasury, user, user2]) => {
     });
     it("should reset active strategy on emergency mode", async () => {
         assert.strictEqual(await vault.activeStrategy(), '0x0000000000000000000000000000000000000000');
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
         assert.strictEqual(await vault.activeStrategy(), strategy.address);
         await vault.setEmergencyMode(true);
@@ -117,7 +117,7 @@ contract("Vault", async ([owner, treasury, user, user2]) => {
         assert.strictEqual((await vault.balanceOf(user)).toNumber(), 0);
     });
     it("should be able to deposit all and withdraw all with dummy strategy", async () => {
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
         await token.mint(user, 120);
         await token.approve(vault.address, 120, {from: user});
@@ -146,7 +146,7 @@ contract("Vault", async ([owner, treasury, user, user2]) => {
     });
 
     it("should be able to deposit into and withdraw from strategy", async () => {
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
         await token.mint(user, 200);
         await token.approve(vault.address, 200, {from: user});
@@ -193,13 +193,13 @@ contract("Vault", async ([owner, treasury, user, user2]) => {
         await expectRevert(vault.harvest({from: owner}), "no strategy");
     });
     it("should allow strategist to harvest", async () => {
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
         await vault.setStrategist(user);
         await vault.harvest({from: user});
     });
     it("should update share prices after harvest", async () => {
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
         await token.mint(user, 200);
         await token.approve(vault.address, 200, {from: user});

@@ -42,7 +42,7 @@ contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
         await hbtcVault.initialize(HBTC, controller.address, "", "");
 
         strategy = await StrategyHbtcCurveHbtc.new(hbtcVault.address);
-        await hbtcVault.setStrategy(strategy.address, true);
+        await hbtcVault.approveStrategy(strategy.address, true);
         await hbtcVault.setActiveStrategy(strategy.address);
 
         startTime = (await time.latest()).addn(10);

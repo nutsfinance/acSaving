@@ -38,7 +38,7 @@ contract("Vault", async ([owner, treasury, user1, user2, user3, user4]) => {
         await vault.initialize(token.address, controller.address, "", "");
         await controller.setVault(0, vault.address);
         strategy = await Strategy.new(vault.address);
-        await vault.setStrategy(strategy.address, true);
+        await vault.approveStrategy(strategy.address, true);
         await vault.setActiveStrategy(strategy.address);
 
         await token.mint(user1, web3.utils.toWei('1000'));

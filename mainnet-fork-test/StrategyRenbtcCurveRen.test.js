@@ -41,7 +41,7 @@ contract("StrategyRenBtcCurveRen", async ([owner, user, user2, treasury]) => {
         await renBtcVault.initialize(RENBTC, controller.address, "", "");
 
         strategy = await StrategyRenBtcCurveRen.new(renBtcVault.address);
-        await renBtcVault.setStrategy(strategy.address, true);
+        await renBtcVault.approveStrategy(strategy.address, true);
         await renBtcVault.setActiveStrategy(strategy.address);
 
         startTime = (await time.latest()).addn(10);

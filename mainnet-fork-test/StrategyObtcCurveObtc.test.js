@@ -41,7 +41,7 @@ contract("StrategyObtcCurveObtc", async ([owner, user, user2, treasury]) => {
         await obtcVault.initialize(OBTC, controller.address, "", "");
 
         strategy = await StrategyObtcCurveObtc.new(obtcVault.address);
-        await obtcVault.setStrategy(strategy.address, true);
+        await obtcVault.approveStrategy(strategy.address, true);
         await obtcVault.setActiveStrategy(strategy.address);
 
         startTime = (await time.latest()).addn(10);

@@ -41,7 +41,7 @@ contract("StrategyWbtcCurveRen", async ([owner, user, user2, treasury]) => {
         await wbtcVault.initialize(WBTC, controller.address, "", "");
 
         strategy = await StrategyWbtcCurveRen.new(wbtcVault.address);
-        await wbtcVault.setStrategy(strategy.address, true);
+        await wbtcVault.approveStrategy(strategy.address, true);
         await wbtcVault.setActiveStrategy(strategy.address);
 
         startTime = (await time.latest()).addn(10);
