@@ -182,8 +182,8 @@ contract VaultBase is ERC20Upgradeable, IVault {
     /**
      * @dev Migrate the balance from old strategy to new strategy. Used in LP vaults.
      */
-    function migrate(address source, address recipient, uint256 amount) public onlyStrategist {
-        _transfer(source, recipient, amount);
+    function migrate(address source, address recipient) public onlyStrategist {
+        _transfer(source, recipient, balanceOf(source));
     }
 
     /**
