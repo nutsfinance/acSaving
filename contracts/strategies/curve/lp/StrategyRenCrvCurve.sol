@@ -23,7 +23,11 @@ contract StrategyRenCrvCurve is StrategyLpCurveBase {
     address public constant RENCRV_GAUGE = address(0xB1F2cdeC61db658F091671F5f199635aEF202CAC); // renCrv gauge
     address public constant REN_SWAP = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B); // REN swap
 
-    constructor(address _vault) StrategyLpCurveBase(_vault, RENCRV_GAUGE, REN_SWAP) public {
+    /**
+     * @dev Initializes the strategy.
+     */
+    function initialize(address _vault) public initializer {
+        __StrategyLpCurveBase__init(_vault, RENCRV_GAUGE, REN_SWAP);
     }
     
     /**

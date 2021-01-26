@@ -23,7 +23,11 @@ contract StrategyRenBtcCurveRen is StrategyCurveBase {
     address public constant RENCRV_VAULT = address(0x59aAbBC33311fD0961F17E684584c0A090034d5F); // renCrv vault
     address public constant REN_SWAP = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B); // REN swap
 
-    constructor(address _vault) StrategyCurveBase(_vault, RENCRV_VAULT, REN_SWAP) public {
+    /**
+     * @dev Initializes the strategy.
+     */
+    function initialize(address _vault) public initializer {
+        __StrategyCurveBase__init(_vault, RENCRV_VAULT, REN_SWAP);
     }
 
     /**

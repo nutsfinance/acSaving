@@ -6,6 +6,7 @@ const ERC20 = artifacts.require("ERC20Upgradeable");
 const Vault = artifacts.require("Vault");
 const Controller = artifacts.require("Controller");
 const MockToken = artifacts.require("MockToken");
+const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 
 const HBTC = '0x0316eb71485b0ab14103307bf65a021042c6d380';
 const HBTC_HOLDER = '0x24d48513eac38449ec7c310a79584f87785f856f';
@@ -41,7 +42,13 @@ contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
         hbtcVault = await Vault.new();
         await hbtcVault.initialize(HBTC, controller.address, "", "");
 
-        strategy = await StrategyHbtcCurveHbtc.new(hbtcVault.address);
+        const strategyImpl = await StrategyHbtcCurveHbtc.new();
+        const proxy = await AdminUpgradeabilityProxy.new(strategyImpl.address, owner);
+        strategy = await StrategyHbtcCurveHbtc.at(proxy.address);
+        await strategy.initialize(hbtcVault.address);
+        // strategy = await StrategyHbtcCurveHbtc.new();
+        // await strategy.initialize(hbtcVault.address);
+
         await hbtcVault.approveStrategy(strategy.address, true);
         await hbtcVault.setActiveStrategy(strategy.address);
 

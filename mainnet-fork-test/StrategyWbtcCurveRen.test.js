@@ -6,6 +6,7 @@ const ERC20 = artifacts.require("ERC20Upgradeable");
 const Vault = artifacts.require("Vault");
 const Controller = artifacts.require("Controller");
 const MockToken = artifacts.require("MockToken");
+const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 
 const WBTC = '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599';
 const WBTC_HOLDER = '0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2';
@@ -40,7 +41,11 @@ contract("StrategyWbtcCurveRen", async ([owner, user, user2, treasury]) => {
         wbtcVault = await Vault.new();
         await wbtcVault.initialize(WBTC, controller.address, "", "");
 
-        strategy = await StrategyWbtcCurveRen.new(wbtcVault.address);
+        const strategyImpl = await StrategyWbtcCurveRen.new();
+        const proxy = await AdminUpgradeabilityProxy.new(strategyImpl.address, owner);
+        strategy = await StrategyWbtcCurveRen.at(proxy.address);
+        await strategy.initialize(wbtcVault.address);
+
         await wbtcVault.approveStrategy(strategy.address, true);
         await wbtcVault.setActiveStrategy(strategy.address);
 

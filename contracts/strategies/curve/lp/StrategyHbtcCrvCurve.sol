@@ -23,7 +23,11 @@ contract StrategyHbtcCrvCurve is StrategyLpCurveBase {
     address public constant HBTCCRV_GAUGE = address(0x4c18E409Dc8619bFb6a1cB56D114C3f592E0aE79); // hbtcCrv gauge
     address public constant HBTC_SWAP = address(0x4CA9b3063Ec5866A4B82E437059D2C43d1be596F); // HBTC swap
 
-    constructor(address _vault) StrategyLpCurveBase(_vault, HBTCCRV_GAUGE, HBTC_SWAP) public {
+    /**
+     * @dev Initializes the strategy.
+     */
+    function initialize(address _vault) public initializer {
+        __StrategyLpCurveBase__init(_vault, HBTCCRV_GAUGE, HBTC_SWAP);
     }
     
     /**

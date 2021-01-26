@@ -26,7 +26,11 @@ contract StrategyObtcCrvCurve is StrategyLpCurveBase {
     
     address public constant bor = address(0x3c9d6c1C73b31c837832c72E04D3152f051fc1A9); 
 
-    constructor(address _vault) StrategyLpCurveBase(_vault, OBTCCRV_GAUGE, OBTC_DEPOSIT) public {
+    /**
+     * @dev Initializes the strategy.
+     */
+    function initialize(address _vault) public initializer {
+        __StrategyLpCurveBase__init(_vault, OBTCCRV_GAUGE, OBTC_DEPOSIT);
     }
     
     /**

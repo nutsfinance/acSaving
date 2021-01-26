@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.6.12;
 
+import "@openzeppelin/contracts-upgradeable/proxy/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC20/SafeERC20Upgradeable.sol";
 
@@ -14,7 +15,7 @@ import "../interfaces/IController.sol";
  * This contact defines common properties and functions shared by all strategies.
  * One strategy is bound to one vault and cannot be changed.
  */
-abstract contract StrategyBase is IStrategy {
+abstract contract StrategyBase is IStrategy, Initializable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     event PerformanceFeeUpdated(uint256 oldPerformanceFee, uint256 newPerformanceFee);
@@ -25,7 +26,7 @@ abstract contract StrategyBase is IStrategy {
     uint256 public override withdrawalFee;
     uint256 public constant PERCENT_MAX = 10000;    // 0.01%
 
-    constructor(address _vault) internal {
+    function __StrategyBase_init(address _vault) internal initializer {
         require(_vault != address(0x0), "vault not set");
         vault = _vault;
     }

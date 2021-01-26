@@ -31,7 +31,9 @@ abstract contract StrategyLpCurveBase is StrategyBase {
     address public gauge;
     address public curve;
 
-    constructor(address _vault, address _gauge, address _curve) StrategyBase(_vault) internal {
+    function __StrategyLpCurveBase__init(address _vault, address _gauge, address _curve) internal initializer {
+        __StrategyBase_init(_vault);
+
         require(_gauge != address(0x0), "gauge not set");
         require(_curve != address(0x0), "curve not set");
         gauge = _gauge;

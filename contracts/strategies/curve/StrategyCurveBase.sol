@@ -28,13 +28,17 @@ abstract contract StrategyCurveBase is StrategyBase {
     // Pool parameters
     address public lpVault;
     address public curve;
-    uint256 public slippage = 100;  // 1% max slippage
+    uint256 public slippage;
 
-    constructor(address _vault, address _lpVault, address _curve) StrategyBase(_vault) internal {
+    function __StrategyCurveBase__init(address _vault, address _lpVault, address _curve) internal initializer {
+        __StrategyBase_init(_vault);
+
         require(_lpVault != address(0x0), "LP vault not set");
         require(_curve != address(0x0), "curve not set");
         lpVault = _lpVault;
         curve = _curve;
+
+        slippage = 100; // 1% max slippage
     }
 
     /**

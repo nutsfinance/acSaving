@@ -23,7 +23,11 @@ contract StrategyWbtcCurveHbtc is StrategyCurveBase {
     address public constant HBTCCRV_VAULT = address(0x68A8aaf01892107E635d5DE1564b0D0a3FE39406); // hbtcCrv vault
     address public constant HBTC_SWAP = address(0x4CA9b3063Ec5866A4B82E437059D2C43d1be596F); // HBTC swap
 
-    constructor(address _vault) StrategyCurveBase(_vault, HBTCCRV_VAULT, HBTC_SWAP) public {
+    /**
+     * @dev Initializes the strategy.
+     */
+    function initialize(address _vault) public initializer {
+        __StrategyCurveBase__init(_vault, HBTCCRV_VAULT, HBTC_SWAP);
     }
 
     /**

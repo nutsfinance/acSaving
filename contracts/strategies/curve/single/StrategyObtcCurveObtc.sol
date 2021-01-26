@@ -23,7 +23,11 @@ contract StrategyObtcCurveObtc is StrategyCurveBase {
     address public constant OBTCCRV_VAULT = address(0xa73b91094304cd7bd1e67a839f63e287B29c0f65); // obtcCrv vault
     address public constant OBTC_SWAP = address(0xd81dA8D904b52208541Bade1bD6595D8a251F8dd); // OBTC swap
 
-    constructor(address _vault) StrategyCurveBase(_vault, OBTCCRV_VAULT, OBTC_SWAP) public {
+    /**
+     * @dev Initializes the strategy.
+     */
+    function initialize(address _vault) public initializer {
+        __StrategyCurveBase__init(_vault, OBTCCRV_VAULT, OBTC_SWAP);
     }
 
     /**

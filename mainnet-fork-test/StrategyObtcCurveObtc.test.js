@@ -6,6 +6,7 @@ const ERC20 = artifacts.require("ERC20Upgradeable");
 const Vault = artifacts.require("Vault");
 const Controller = artifacts.require("Controller");
 const MockToken = artifacts.require("MockToken");
+const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 
 const OBTC = '0x8064d9Ae6cDf087b1bcd5BDf3531bD5d8C537a68';
 const OBTC_HOLDER = '0x1ca2bc2e401eae4320c17528b91b078b3d16d39d';
@@ -40,7 +41,11 @@ contract("StrategyObtcCurveObtc", async ([owner, user, user2, treasury]) => {
         obtcVault = await Vault.new();
         await obtcVault.initialize(OBTC, controller.address, "", "");
 
-        strategy = await StrategyObtcCurveObtc.new(obtcVault.address);
+        const strategyImpl = await StrategyObtcCurveObtc.new();
+        const proxy = await AdminUpgradeabilityProxy.new(strategyImpl.address, owner);
+        strategy = await StrategyObtcCurveObtc.at(proxy.address);
+        await strategy.initialize(obtcVault.address);
+
         await obtcVault.approveStrategy(strategy.address, true);
         await obtcVault.setActiveStrategy(strategy.address);
 

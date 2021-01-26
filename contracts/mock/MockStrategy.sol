@@ -9,7 +9,9 @@ import "./MockToken.sol";
  */
 contract MockStrategy is StrategyBase {
 
-    constructor(address vault) public StrategyBase(vault) {}
+    constructor(address _vault) public {
+        vault = _vault;
+    }
 
     /**
      * @dev Returns the total balance of want token in this Strategy.

@@ -6,6 +6,7 @@ const ERC20 = artifacts.require("ERC20Upgradeable");
 const Vault = artifacts.require("Vault");
 const Controller = artifacts.require("Controller");
 const MockToken = artifacts.require("MockToken");
+const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 
 const RENBTC = '0xEB4C2781e4ebA804CE9a9803C67d0893436bB27D';
 const RENBTC_HOLDER = '0x53463cd0b074E5FDafc55DcE7B1C82ADF1a43B2E';
@@ -40,7 +41,11 @@ contract("StrategyRenBtcCurveRen", async ([owner, user, user2, treasury]) => {
         renBtcVault = await Vault.new();
         await renBtcVault.initialize(RENBTC, controller.address, "", "");
 
-        strategy = await StrategyRenBtcCurveRen.new(renBtcVault.address);
+        const strategyImpl = await StrategyRenBtcCurveRen.new();
+        const proxy = await AdminUpgradeabilityProxy.new(strategyImpl.address, owner);
+        strategy = await StrategyRenBtcCurveRen.at(proxy.address);
+        await strategy.initialize(renBtcVault.address);
+
         await renBtcVault.approveStrategy(strategy.address, true);
         await renBtcVault.setActiveStrategy(strategy.address);
 
