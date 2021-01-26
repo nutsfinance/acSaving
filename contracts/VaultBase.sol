@@ -167,26 +167,23 @@ contract VaultBase is ERC20Upgradeable, IVault {
     }
 
     /**
-     * @dev Updates the active strategy of the vault. Only governance or strategist can update the active strategy.
-     * Only approved strategy can be selected as active strategy.
-     * No new strategy is accepted in emergency mode.
+     * @dev Updates the active strategy of the vault. Used in single vaults.
      */
     function setActiveStrategy(address _strategy) public override onlyStrategist notEmergencyMode {
-        // The new active strategy can be zero address, which means withdrawing all assets back to the vault.
-        // Otherwise, the new strategy must be approved by governance before hand.
-        require(_strategy == address(0x0) || approvedStrategies[_strategy], "strategy not approved");
         address oldStrategy = activeStrategy;
-        require(oldStrategy != _strategy, "same strategy");
+        approvedStrategies[oldStrategy] = false;    // Revokes old strategy
+        approvedStrategies[_strategy] = true;   // Approve new strategy
 
-        // If the vault has an existing strategy, withdraw all assets from it.
-        if (oldStrategy != address(0x0)) {
-            IStrategy(oldStrategy).withdrawAll();
-        }
+        activeStrategy = _strategy; // Simply update the active strategy
 
-        activeStrategy = _strategy;
-        // Starts earning once a new strategy is set.
-        earn();
         emit ActiveStrategyUpdated(oldStrategy, _strategy);
+    }
+
+    /**
+     * @dev Migrate the balance from old strategy to new strategy. Used in LP vaults.
+     */
+    function migrate(address source, address recipient, uint256 amount) public onlyStrategist {
+        _transfer(source, recipient, amount);
     }
 
     /**
