@@ -18,7 +18,7 @@ async function timeIncreaseTo (seconds) {
 
 /**
  * Start Mainnet fork node:
- * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u 0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2
+ * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u "0x2faf487a4414fe77e2327f0bf4ae2a264a776ad2"
  * 
  * Run test:
  * truffle test mainnet-fork-test/StrategyWbtcCurveRen.test.js
@@ -56,5 +56,8 @@ contract("StrategyWbtcCurveRen", async ([owner, user, user2, treasury]) => {
 
         await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
         await wbtcVault.harvest();
+
+        const MAX = web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1));
+        await wbtcVault.withdraw(MAX, {from: WBTC_HOLDER});
     });
 });

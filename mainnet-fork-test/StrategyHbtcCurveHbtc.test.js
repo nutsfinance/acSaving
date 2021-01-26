@@ -19,7 +19,7 @@ async function timeIncreaseTo (seconds) {
 
 /**
  * Start Mainnet fork node:
- * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u 0x24d48513eac38449ec7c310a79584f87785f856f
+ * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u "0x24d48513eac38449ec7c310a79584f87785f856f"
  * 
  * Run test:
  * truffle test mainnet-fork-test/StrategyHbtcCurveHbtc.test.js
@@ -55,5 +55,8 @@ contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
 
         await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
         await hbtcVault.harvest();
+
+        const MAX = web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1));
+        await hbtcVault.withdraw(MAX, {from: HBTC_HOLDER});
     });
 });

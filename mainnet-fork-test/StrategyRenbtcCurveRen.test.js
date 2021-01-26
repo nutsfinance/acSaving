@@ -18,7 +18,7 @@ async function timeIncreaseTo (seconds) {
 
 /**
  * Start Mainnet fork node:
- * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u 0x53463cd0b074E5FDafc55DcE7B1C82ADF1a43B2E
+ * ganache-cli --fork https://mainnet.infura.io/v3/0df468116d40490fb2929a8d6664b1d2 -u "0x53463cd0b074E5FDafc55DcE7B1C82ADF1a43B2E"
  * 
  * Run test:
  * truffle test mainnet-fork-test/StrategyRenbtcCurveRen.test.js
@@ -56,5 +56,8 @@ contract("StrategyRenBtcCurveRen", async ([owner, user, user2, treasury]) => {
 
         await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
         await renBtcVault.harvest();
+
+        const MAX = web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1));
+        await renBtcVault.withdraw(MAX, {from: RENBTC_HOLDER});
     });
 });
