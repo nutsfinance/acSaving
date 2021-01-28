@@ -6,6 +6,7 @@ const OBTC_VAULT = '0x3fb7F1353E88a934a4c913fA5e8261b54c0560c6';
 const OBTC_CRV_VAULT = '0xa73b91094304cd7bd1e67a839f63e287B29c0f65';
 const VAULT_IMPL = '0x1133D93cd74B1c159F8ce85216Bf3951f5Fe51B2';
 const OBTC_STRATEGY = '0x9170af62dEdC40a29D60F252a1b8978c5f6033e5';
+const TEMP_VAULT_IMPL = '0x128E259C7203513a6844FeF25A36B020f37f38d4';
 
 const DEPLOYER = '0x2932516D9564CB799DDA2c16559caD5b8357a0D6';
 
@@ -23,10 +24,12 @@ module.exports = async function (callback) {
         const obtcStrategyProxy = await AdminUpgradeabilityProxy.new(obtcStrategyImpl.address, DEPLOYER, {from: DEPLOYER});
         const obtcStrategy = await StrategyObtcCurveObtc.at(obtcStrategyProxy.address, {from: DEPLOYER});
         await obtcStrategy.initialize(OBTC_VAULT, {from: DEPLOYER});
+        console.log('New OBTC strategy impl: ' + obtcStrategyImpl.address);
         console.log('New OBTC strategy: ' + obtcStrategy.address);
 
         // Deploy temp Vault
-        const tempVault = await Vault.new({from: DEPLOYER});
+        // const tempVault = await Vault.new({from: DEPLOYER});
+        const tempVault = await Vault.at(TEMP_VAULT_IMPL);
 
         // Change OBTC vault implementation to temp vault
         const obtcVaultProxy = await AdminUpgradeabilityProxy.at(OBTC_VAULT);

@@ -6,6 +6,7 @@ const RENBTC_VAULT = '0xa0FDab08eCa6E53652Cb79C6eF6Fc562e04D0822';
 const REN_CRV_VAULT = '0x59aAbBC33311fD0961F17E684584c0A090034d5F';
 const VAULT_IMPL = '0x1133D93cd74B1c159F8ce85216Bf3951f5Fe51B2';
 const RENBTC_STRATEGY = '0x1c3D50f251464C98D93881847807F3888086F04E';
+const TEMP_VAULT_IMPL = '0x128E259C7203513a6844FeF25A36B020f37f38d4';
 
 const DEPLOYER = '0x2932516D9564CB799DDA2c16559caD5b8357a0D6';
 
@@ -23,10 +24,12 @@ module.exports = async function (callback) {
         const renBtcStrategyProxy = await AdminUpgradeabilityProxy.new(renBtcStrategyImpl.address, DEPLOYER, {from: DEPLOYER});
         const renBtcStrategy = await StrategyRenBtcCurveRen.at(renBtcStrategyProxy.address, {from: DEPLOYER});
         await renBtcStrategy.initialize(RENBTC_VAULT, {from: DEPLOYER});
+        console.log('New RENBTC strategy impl: ' + renBtcStrategyImpl.address);
         console.log('New RENBTC strategy: ' + renBtcStrategy.address);
 
         // Deploy temp Vault
-        const tempVault = await Vault.new({from: DEPLOYER});
+        // const tempVault = await Vault.new({from: DEPLOYER});
+        const tempVault = await Vault.at(TEMP_VAULT_IMPL);
 
         // Change RENBTC vault implementation to temp vault
         const renBtcVaultProxy = await AdminUpgradeabilityProxy.at(RENBTC_VAULT);

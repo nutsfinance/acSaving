@@ -3,6 +3,8 @@ const Vault = artifacts.require("Vault");
 const ControllerProxy = artifacts.require("ControllerProxy");
 const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
 
+const DEPLOYER = '0x2932516D9564CB799DDA2c16559caD5b8357a0D6';
+
 /**
  * Script to deploy a new proxied vault.
  * Comand:
@@ -10,19 +12,22 @@ const AdminUpgradeabilityProxy = artifacts.require("AdminUpgradeabilityProxy");
  */
 module.exports = async function (callback) {
     try {
-        const accounts = await web3.eth.getAccounts();
-        console.log('Account: ' + accounts[0]);
-        const vault = (await Vault.deployed()).address;
-        console.log('Vault address: ' + vault);
-        const controller = (await ControllerProxy.deployed()).address;
-        console.log('Controller address: ' + controller);
-        console.log('Token: ' + argv.token);
+        // const accounts = await web3.eth.getAccounts();
+        // console.log('Account: ' + accounts[0]);
+        // const vault = (await Vault.deployed()).address;
+        // console.log('Vault address: ' + vault);
+        // const controller = (await ControllerProxy.deployed()).address;
+        // console.log('Controller address: ' + controller);
+        // console.log('Token: ' + argv.token);
         
-        const vaultProxy = await AdminUpgradeabilityProxy.new(vault, accounts[0]);
-        console.log('Vault proxy: ' + vaultProxy.address);
-        const proxiedVault = await Vault.at(vaultProxy.address);
+        // const vaultProxy = await AdminUpgradeabilityProxy.new(vault, accounts[0]);
+        // console.log('Vault proxy: ' + vaultProxy.address);
+        // const proxiedVault = await Vault.at(vaultProxy.address);
 
-        await proxiedVault.initialize(argv.token, controller, '', '');  // No token name and symbol override
+        // await proxiedVault.initialize(argv.token, controller, '', '');  // No token name and symbol override
+
+        const vault = await Vault.new({from: DEPLOYER});
+        console.log('Vault: ' + vault.address);
 
         callback();
     } catch (e) {

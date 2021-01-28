@@ -10,6 +10,7 @@ const VAULT_IMPL = '0x1133D93cd74B1c159F8ce85216Bf3951f5Fe51B2';
 const HBTC_STRATEGY = '0xEc8Dc267CF17E6948072431018CdA6767065D32d';
 const OBTC_STRATEGY = '0x668434279A7380E4Da683897BB02D8a77B6caE0A';
 const REN_STRATEGY = '0xc4fabd307bbc102c6ec86a58e8f201dc7440f871';
+const TEMP_VAULT_IMPL = '0x128E259C7203513a6844FeF25A36B020f37f38d4';
 
 const DEPLOYER = '0x2932516D9564CB799DDA2c16559caD5b8357a0D6';
 
@@ -24,9 +25,12 @@ module.exports = async function (callback) {
 
         // Deploy new HBTC strategy
         const hbtcStrategyImpl = await StrategyWbtcCurveHbtc.new({from: DEPLOYER});
+        // const hbtcStrategyImpl = await StrategyWbtcCurveHbtc.at('0xC3Da852f18390404804f228431c3dfc441B396FF');
         const hbtcStrategyProxy = await AdminUpgradeabilityProxy.new(hbtcStrategyImpl.address, DEPLOYER, {from: DEPLOYER});
+        // const hbtcStrategyProxy = await AdminUpgradeabilityProxy.at('0x8986ebb1111D47B650Bbe37f23576b8F9F4c7EA9');
         const hbtcStrategy = await StrategyWbtcCurveHbtc.at(hbtcStrategyProxy.address, {from: DEPLOYER});
         await hbtcStrategy.initialize(WBTC_VAULT, {from: DEPLOYER});
+        console.log('New HBTC strategy impl: ' + hbtcStrategyImpl.address);
         console.log('New HBTC strategy: ' + hbtcStrategy.address);
 
         // Deploy new OBTC strategy
@@ -34,6 +38,7 @@ module.exports = async function (callback) {
         const obtcStrategyProxy = await AdminUpgradeabilityProxy.new(obtcStrategyImpl.address, DEPLOYER, {from: DEPLOYER});
         const obtcStrategy = await StrategyWbtcCurveObtc.at(obtcStrategyProxy.address, {from: DEPLOYER});
         await obtcStrategy.initialize(WBTC_VAULT, {from: DEPLOYER});
+        console.log('New oBTC strategy impl: ' + obtcStrategyImpl.address);
         console.log('New oBTC strategy: ' + obtcStrategy.address);
 
         // Deploy new REN strategy
@@ -41,32 +46,39 @@ module.exports = async function (callback) {
         const renStrategyProxy = await AdminUpgradeabilityProxy.new(renStrategyImpl.address, DEPLOYER, {from: DEPLOYER});
         const renStrategy = await StrategyWbtcCurveRen.at(renStrategyProxy.address, {from: DEPLOYER});
         await renStrategy.initialize(WBTC_VAULT, {from: DEPLOYER});
+        console.log('New REN strategy impl: ' + renStrategyImpl.address);
         console.log('New REN strategy: ' + renStrategy.address);
 
         // Deploy temp Vault
-        const tempVault = await Vault.new({from: DEPLOYER});
+        // const tempVault = await Vault.new({from: DEPLOYER});
+        const tempVault = await Vault.at(TEMP_VAULT_IMPL);
 
         // Change WBTC vault implementation to temp vault
         const wbtcVaultProxy = await AdminUpgradeabilityProxy.at(WBTC_VAULT);
         await wbtcVaultProxy.changeImplementation(tempVault.address, {from: DEPLOYER});
+        console.log('Change to temp vault');
 
         // Revoke all old strategies
         await wbtcVault.approveStrategy(HBTC_STRATEGY, false, {from: DEPLOYER});
         // await wbtcVault.approveStrategy(OBTC_STRATEGY, false, {from: DEPLOYER}); // This will be revoked in setActiveStrategy()
         await wbtcVault.approveStrategy(REN_STRATEGY, false, {from: DEPLOYER});
+        console.log('Old strategies revoked');
 
         // Approve all new strategies
         await wbtcVault.approveStrategy(hbtcStrategy.address, true, {from: DEPLOYER});
         // await wbtcVault.approveStrategy(obtcStrategy.address, true, {from: DEPLOYER}); // This will be approved in setActiveStrategy()
         await wbtcVault.approveStrategy(renStrategy.address, true, {from: DEPLOYER});
+        console.log('New strategies approved');
 
         // Set new active strategy
         await wbtcVault.setActiveStrategy(obtcStrategy.address, {from: DEPLOYER});
+        console.log('New active strategy set');
 
         // Change obtcCrv vault implementation to temp vault
         const obtcCrvVaultProxy = await AdminUpgradeabilityProxy.at(OBTC_CRV_VAULT);
         await obtcCrvVaultProxy.changeImplementation(tempVault.address, {from: DEPLOYER});
         const obtcCrvVault = await Vault.at(OBTC_CRV_VAULT);
+        console.log('obtcCrv vault set');
 
         // Migrate WBTC strategy balance
         await obtcCrvVault.migrate(OBTC_STRATEGY, obtcStrategy.address, {from: DEPLOYER});
