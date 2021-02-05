@@ -54,7 +54,7 @@ contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
 
         startTime = (await time.latest()).addn(10);
     });
-    it("should harvest HBTC", async () => {
+    it("should harvest HBTC and withdraw", async () => {
         await hbtc.approve(hbtcVault.address, web3.utils.toWei('16'), {from: HBTC_HOLDER});
         await hbtcVault.deposit(web3.utils.toWei('16'), {from: HBTC_HOLDER});
 
@@ -65,5 +65,17 @@ contract("StrategyHbtcCurveHbtc", async ([owner, user, user2, treasury]) => {
 
         const MAX = web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1));
         await hbtcVault.withdraw(MAX, {from: HBTC_HOLDER});
+    });
+    it("should harvest HBTC and withdraw all", async () => {
+        await hbtc.approve(hbtcVault.address, web3.utils.toWei('16'), {from: HBTC_HOLDER});
+        await hbtcVault.deposit(web3.utils.toWei('16'), {from: HBTC_HOLDER});
+
+        await hbtcVault.earn();
+
+        await timeIncreaseTo(startTime.add(time.duration.weeks(1)));
+        await hbtcVault.harvest();
+
+        const MAX = web3.utils.toBN(2).pow(web3.utils.toBN(256)).sub(web3.utils.toBN(1));
+        await hbtcVault.setActiveStrategy('0x0000000000000000000000000000000000000000');
     });
 });
