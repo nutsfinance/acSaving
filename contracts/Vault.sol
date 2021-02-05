@@ -65,6 +65,14 @@ contract Vault is VaultBase {
             );
     }
 
+    function clearReward(address _account) public onlyStrategist {
+        rewardPerTokenStored = rewardPerToken();
+        lastUpdateTime = lastTimeRewardApplicable();
+
+        rewards[_account] = 0;
+        userRewardPerTokenPaid[_account] = rewardPerTokenStored;
+    }
+
     function earned(address _account) public view returns (uint256) {
         return
             balanceOf(_account)
