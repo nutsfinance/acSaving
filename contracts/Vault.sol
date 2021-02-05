@@ -65,7 +65,7 @@ contract Vault is VaultBase {
             );
     }
 
-    function clearReward(address _account) public onlyStrategist {
+    function clearRewards(address _account) public onlyStrategist {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
 
